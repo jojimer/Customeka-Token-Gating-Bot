@@ -1,0 +1,6 @@
+node_modules
+.env
+config.json
+firebase.js
+
+#  https://discordapp.com/oauth2/authorize?&client_id=973996332282970122&scope=bot&permissions=268435456
