@@ -14,9 +14,14 @@ module.exports = {
 
         // Button Interaction
         if(interaction.isButton()) {
-            const a = client.buttons.get('sendWalletId');
-            action = (interaction.customId === 'submitWalletId') ? a.submit : a.cancel;
+            action = client.buttons.get(interaction.customId);
             errorInteraction = 'button';
+        }
+
+        // Modal Submit Interaction
+        if(interaction.isModalSubmit()) {
+            action = client.modals.get(interaction.customId);
+            errorInteraction = 'Modal Submit';
         }
 
         if (!action) return;
