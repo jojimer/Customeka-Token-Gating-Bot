@@ -1,41 +1,37 @@
 // Require the necessary discord.js classes
 const { Client, Collection, Intents } = require('discord.js');
 const { loadCommands, loadButtons, loadModals, loadEvents } = require('./loader');
+const path = require('node:path');
 const { firebaseConfig } = require('./firebase');
 const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, onSnapshot } = require('firebase/firestore');
+const { getFirestore } = require('firebase/firestore');
+const { collection, getDocs, getDoc, deleteDoc, doc, onSnapshot, query, where, orderBy } = require('firebase/firestore');
 
 require('dotenv').config();
 
 // Firebase Config
-// initializeApp(firebaseConfig);
+initializeApp(firebaseConfig);
 
-// // Firestore Init Services
-// const db = getFirestore();
+// Firestore Init Services
+global.fireBaseDB = getFirestore();
+		
+// Set Global Root
+global.appRoot = path.resolve(__dirname);
 
-// // Collection Holder Ref
-// const holder = collection(db, 'holder');
-
-// #Add new doc
-// addDoc(holder, {
-// 	NFT: {
-// 		serialNumber: '3',
-// 		tokenID: '0.0.0.323568',
-// 	},
-// 	userID: "#dg3445235",
-// 	vip: false,
-// 	walletID: "0.0.0.354646" 
-// });
+// Collection Holder Ref
+//const holder = collection(db, 'holder');
 
 // #Delete Doc
 // const docRef = doc(db, 'holder', 'xyvVpblG6X6wHlLrGgSS');
 // deleteDoc(docRef);
 
+// #Queries
+// const q = query(holders, where("id", "==", "<discordID>"), orderBy("username", "desc"));
 
-// #List Collection
-// OnSnapshot will list new data when collection change
-// getDocs will list data once
-// onSnapshot(holder).then((snapshot) => {
+// // #List Collection
+// // #onSnapshot will list new data when collection change
+// // #getDocs will list data once
+// onSnapshot(q, (snapshot) => {
 // 	let userData =  [];
 // 	snapshot.docs.forEach((doc) => {
 // 		userData.push({ ...doc.data(), id: doc.id });

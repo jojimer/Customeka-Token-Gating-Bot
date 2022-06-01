@@ -57,7 +57,7 @@ module.exports = {
 
         return collection;
     },
-    loadEvents: (client) => {        
+    loadEvents: (client) => {
 
         for (const file of eventFiles) {
             const event = require(`./events/${file}`);
