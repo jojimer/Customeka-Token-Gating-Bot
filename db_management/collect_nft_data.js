@@ -9,18 +9,32 @@ initializeApp(firebaseConfig);
 
 // inittialize firestore
 const db = getFirestore();
+// const nfts = doc(db,'nfts','BlackCrawford');
+// // #Queries
+// const q = query(nfts, where(`{i}.account_id`, "==", "0.0.531372"), orderBy("serial_number", "desc"));
+// onSnapshot(q, (snapshot) => {
+// 	let userData =  [];
+// 	snapshot.docs.forEach((doc) => {
+// 		userData.push({ ...doc.data(), id: doc.id });
+// 	});
+// 	console.log(userData);
+// })
 
-getNFTs().then( async res => {
+const NFTs = getNFTs();
+const tokenID = NFTs.token_id;
+const docName = NFTs.doc;
+
+NFTs.result.then(async res => {
     const NFTs = res.data.nfts;
-    const data = {};
-    const docRef = doc(db,'nfts','RaffleTickets');
+    const data = {[`${tokenID}`]: {}};
+    const docRef = doc(db,'badges',docName);
 
     await NFTs.map(nft => {
         const account_id = nft.account_id;
         const token_id = nft.token_id;
         const serial_number = nft.serial_number;
 
-        //if(serial_number <= 25) return;
+        if(serial_number <= 25) return;
         
         const dataString = `{
             "token_id": "${token_id}",
@@ -29,37 +43,12 @@ getNFTs().then( async res => {
         }`;
         const obj = JSON.parse(dataString);
         // data[`${token_id+`_sn`+serial_number}`] = obj;
-        data[`${serial_number}`] = obj;
+        data[`${tokenID}`][`${serial_number}`] = obj;
     })
 
+    //console.log(data)
+    if(Object.keys(data[`${tokenID}`]).length === 0) return;
     setDoc(docRef,data,{merge: true});
 }).catch(err => {
     console.log(err);
 });
-
-// #Save NFTs with Single TokenID on a category
-// getNFTs().then( async res => {
-//     const NFTs = res.data.nfts;
-//     const data = {};
-//     const docRef = doc(db,'badges','fusions');
-
-//     await NFTs.map(nft => {
-//         const account_id = nft.account_id;
-//         const token_id = nft.token_id;
-//         const serial_number = nft.serial_number;
-
-//         if(serial_number <= 25) return;
-        
-//         const dataString = `{
-//             "token_id": "${token_id}",
-//             "account_id": "${account_id}",
-//             "serial_number": ${serial_number}
-//         }`;
-//         const obj = JSON.parse(dataString);
-//         data[`${serial_number}`] = obj;
-//     })
-
-//     setDoc(docRef,data);
-// }).catch(err => {
-//     console.log(err);
-// });
