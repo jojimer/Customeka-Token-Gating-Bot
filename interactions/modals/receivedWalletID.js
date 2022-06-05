@@ -1,28 +1,33 @@
 const { MessageActionRow, Modal, TextInputComponent, MessageEmbed } = require('discord.js');
+const { start } = require('node:repl');
 const { addUser, lookForDoodles, lookForBadges } = require(appRoot+'/db_management/control');
 const { data } = require(appRoot+'/hedera/nfts');
 const wait = require('node:timers/promises').setTimeout;
 const findRole = (cache,roleId) => { return cache.find(r => r.id === roleId); };
 
-// Processing Wallet Dialoge
-// Doodles - Arc0-2, SpecialEdition, MetaFrost, Sweetizens
-// Lazy Doodles - LSVKematian, LSVJester, LSHKjell, LSHCrawford, BlackCrawford, BlackZ
-const dialoges = [
-    'Please wait while we process your WalletID: ',
-    'Doodles: ',
-    'Doodle Punks: ',
-    'Doodle Shadyz: ',
-    'Lazy Doodles: ',
-    'Fusion ',
-    'Silver ',
-    'Gold ',
-    'Diamond ',
-    'Eternal ',
-    'Raffle Tickets: ',
-    'Total Doodles: ',
-    'Total Badges: ',
-    'Congratulations, You received role/s: '
-];
+// Get All Dialoges, Type, Keys
+const dialoges = data.Dialoges;
+const rolesReceived = [];
+const randomNumb = () => ~~(Math.random() * (7 - 4 + 4) + 4);
+let loading = 0;
+const icon = {
+    start: "http://assets.stickpng.com/thumbs/5a007221092a74e5b928e78b.png",
+    finish: "http://assets.stickpng.com/thumbs/5aa78e267603fc558cffbf1a.png"
+}
+
+// Roles Identifyer
+const roleIdentifyer = async (token_id) => {
+    // Get Role Lists
+    const roles = data.Roles;
+
+    let choices = Object.keys(roles).filter(key => {
+        let tokenID = roles[`${key}`].token_id.filter(token => token_id === token);
+        if(tokenID.length !== 0) return roles[`${key}`].roleName;
+    });
+
+    if(choices.length && rolesReceived.indexOf(...choices) === -1)
+        rolesReceived.push(...choices);        
+}
 
 module.exports = {
     data: new Modal()
@@ -42,23 +47,14 @@ module.exports = {
     async execute(interaction) {
         // Get Wallet ID
         const walletID = interaction.fields.getTextInputValue('walletID');
-        let content = dialoges[0]+"\n"+walletID;
+        let content = dialoges[0];
         let itemsProccesed = 0;
-        let totalDoodles = 0,
-            totalDoodlePunks = 0,
-            totalDoodleShadyz = 0,
-            totalLazyDoodles = 0,
-            totalFusions = 0,
-            totalSilvers = 0,
-            totalGolds = 0,
-            totalDiamonds = 0, 
-            totalEternals = 0,
-            totalRaffleTickets = 0;
 
         let roleMap = [];
 
         const newEmbed = new MessageEmbed()
-        .setColor('RANDOM').setTitle(content);
+        .setColor('RANDOM').setTitle(content)
+        .setDescription(walletID).setFooter({text: "| 0%", iconURL: icon.start});
 
         // Process Initial Bot Reply
         await interaction.reply({
@@ -73,306 +69,93 @@ module.exports = {
         // Submit Data to firebase
         await addUser(fireBaseDB,userData);
 
-        // Count Doodles
-        await wait(1000 * 1)
-        await data.Doodles.forEach((token_id, index, array) => {
-            lookForDoodles(fireBaseDB,walletID,token_id,(numb => {
-                totalDoodles += numb;                
-                itemsProccesed++
-                if(itemsProccesed === array.length){
-                    newEmbed.addField(dialoges[1],totalDoodles.toString(),false);
-                    interaction.editReply({embeds: [newEmbed]});
-                    itemsProccesed = 0;
-                    roleMap.push(totalDoodles);
-                }        
-            }));                       
-        });
+        for(let i=1; i<=dialoges.length-1; i++){
+            const type = dialoges[i].type;
+            const key = dialoges[i].key;
+            const tokenIDs = (type === 'doodle' || type === 'raffleTicket') 
+                    ? data[`${key}`]
+                    : (type === 'badge') ? data.Badges[`${key}`] : false;
+            let content = dialoges[i].content;
 
-        // Count Doodle Punks
-        await wait(1000 * 1)        
-        await data.DoodlePunks.forEach((token_id, index, array) => {
-            lookForDoodles(fireBaseDB,walletID,token_id,(numb => {
-                totalDoodlePunks += numb;
-                itemsProccesed++
-                if(itemsProccesed === array.length){
-                    newEmbed.addField(dialoges[2],totalDoodlePunks.toString(),false);
-                    interaction.editReply({embeds: [newEmbed]});
-                    itemsProccesed = 0;
-                    roleMap.push(totalDoodlePunks);
-                } 
-            }));
-        });
+            if(type === 'doodle' || type === 'raffleTicket')
+                tokenIDs.forEach(async token_id => {
+                    await lookForDoodles(fireBaseDB,walletID,token_id,(numb => {
+                        // Get Role
+                        if(numb !== 0) roleIdentifyer(token_id);
+                        // Increment Number Doodle in Single Token ID
+                        if(numb > 0) dialoges[i].total += numb;
+                        // Increment Overall Doodles
+                        if(numb > 0 && key !== 'RaffleTickets') dialoges[11].total += numb;  
+                        itemsProccesed++
+                        if(itemsProccesed === tokenIDs.length){
+                            content = (key === 'RaffleTickets' && dialoges[i].total > 1)
+                                ? "Raffle Tickets: " : content;
+                            newEmbed.addField(content,dialoges[i].total.toString(),false);
+                            interaction.editReply({embeds: [newEmbed]});
+                            itemsProccesed = 0;
+                            dialoges[i].total = 0;
+                            return;
+                        }        
+                    }));
+                    await wait(1000);        
+                });
 
-        // Count Doodle Shadyz
-        await wait(1000 * 1)
-        await data.DoodleShadyz.forEach((token_id, index, array) => {
-        lookForDoodles(fireBaseDB,walletID,token_id,(numb => {
-            totalDoodleShadyz += numb;
-            itemsProccesed++
-                if(itemsProccesed === array.length){
-                    newEmbed.addField(dialoges[3],totalDoodleShadyz.toString(),false);
-                    interaction.editReply({embeds: [newEmbed]});
-                    itemsProccesed = 0;
-                    roleMap.push(totalDoodleShadyz);
-                }
-            }));
-        });
+            if(type === 'badge')
+                await lookForBadges(fireBaseDB,walletID,tokenIDs,(numb => {
+                        // Increment Number of Badges in single Token ID
+                        const badges = dialoges[i].total += numb;
+                        // Increment Overall Badges
+                        if(numb > 0) dialoges[12].total += badges;
+                        const sp = (numb > 1) ? " Badges: " : " Badge: ";
+                        newEmbed.addField(content+sp,badges.toString(),false);
+                        interaction.editReply({embeds: [newEmbed]});
+                        dialoges[i].total = 0;
+                        return;
+                }));
 
-        // Count Lazy Doodles
-        await wait(1000 * 1)
-        await data.LazyDoodles.forEach((token_id, index, array) => {
-            lookForDoodles(fireBaseDB,walletID,token_id,(numb => {
-                totalLazyDoodles += numb;
-                itemsProccesed++
-                if(itemsProccesed === array.length){
-                    newEmbed.addField(dialoges[4],totalLazyDoodles.toString(),false);
-                    interaction.editReply({embeds: [newEmbed]});
-                    itemsProccesed = 0;
-                    roleMap.push(totalLazyDoodles);
-                }
-            }));
-        });
-
-        // Count Fusions
-        await wait(1000 * 1)
-        const badges = data.Badges;
-        await lookForBadges(fireBaseDB,walletID,badges.fusions,(numb => {
-                totalFusions += numb;
-                const newContent = (numb > 1) 
-                    ? dialoges[5]+" Badges: " 
-                    : dialoges[5]+" Badge: ";
-                newEmbed.addField(newContent,totalFusions.toString(),false);
+            if(type === 'dialoge' && key === 'TotalDoodle'){
+                // Total Doodles
+                const totalDoodles = dialoges[i].total;
+                const sp = (totalDoodles > 1) ? "s: " : ": ";
+                newEmbed.addField(content+sp,totalDoodles.toString(),false);
                 interaction.editReply({embeds: [newEmbed]});
-        }));
-
-        // Count Silvers
-        await wait(1000 * 1)
-        await lookForBadges(fireBaseDB,walletID,badges.silvers,(numb => {
-                totalSilvers += numb;
-                const newContent = (numb > 1) 
-                    ? dialoges[6]+" Badges: " 
-                    : dialoges[6]+" Badge: ";
-                newEmbed.addField(newContent,totalSilvers.toString(),false);
+                dialoges[i].total = 0;
+            }
+            
+            if(type === 'dialoge' && key === 'TotalBadge'){
+                // Total Badges
+                const totalBadges = dialoges[i].total;
+                const sp = (totalBadges > 1) ? "s: " : ": ";
+                newEmbed.addField(content+sp,totalBadges.toString(),false);
                 interaction.editReply({embeds: [newEmbed]});
-        }));
+                dialoges[i].total = 0;
+            }
 
-        // Count Golds
-        await wait(1000 * 1)
-        await lookForBadges(fireBaseDB,walletID,badges.golds,(numb => {
-                totalGolds += numb;
-                const newContent = (numb > 1) 
-                    ? dialoges[7]+" Badges: " 
-                    : dialoges[7]+" Badge: ";
-                newEmbed.addField(newContent,totalGolds.toString(),false);
+            // Total Roles Received
+            if(key === 'Roles'){
+                let allRoles = "";
+                let finalDialoge = (rolesReceived.length > 1) 
+                    ? dialoges[i].content+"s: " : dialoges[i].content;
+                rolesReceived.map(key => { allRoles += "- "+data.Roles[`${key}`].roleName+"\n"; });
+
+                let finalLoading = "|".repeat(100)+" 100%";
+                newEmbed.setFooter({
+                    text: finalDialoge+"\n\n"+allRoles+"\n"+finalLoading,
+                    iconURL: icon.finish
+                });
                 interaction.editReply({embeds: [newEmbed]});
-        }));
-
-        // Count Diamonds
-        await wait(1000 * 1)
-        await lookForBadges(fireBaseDB,walletID,badges.diamonds,(numb => {
-                totalDiamonds += numb;
-                const newContent = (numb > 1) 
-                    ? dialoges[8]+" Badges: " 
-                    : dialoges[8]+" Badge: ";
-                newEmbed.addField(newContent,totalDiamonds.toString(),false);
+                rolesReceived.length = 0;
+                loading = 0;
+            }else{
+                loading += randomNumb();
+                newEmbed.setFooter({
+                    text: "|".repeat(loading)+" "+loading+"%",
+                    iconURL: icon.start
+                });
                 interaction.editReply({embeds: [newEmbed]});
-        }));
+            }
 
-        // Count Eternals
-        await wait(1000 * 1)
-        await lookForBadges(fireBaseDB,walletID,badges.eternals,(numb => {
-                totalEternals += numb;
-                const newContent = (numb > 1) 
-                    ? dialoges[9]+" Badges: " 
-                    : dialoges[9]+" Badge: ";
-                newEmbed.addField(newContent,totalEternals.toString(),false);
-                interaction.editReply({embeds: [newEmbed]});
-        }));
-
-        // Count Raffle Tickets
-        await wait(1000 * 1)        
-        await data.RaffleTickets.forEach((token_id, index, array) => {
-            lookForDoodles(fireBaseDB,walletID,token_id,(numb => {
-                totalRaffleTickets += numb;
-                itemsProccesed++
-                if(itemsProccesed === array.length){
-                    newEmbed.addField(dialoges[10],totalRaffleTickets.toString(),false);
-                    interaction.editReply({embeds: [newEmbed]});
-                    itemsProccesed = 0;
-                    roleMap.push(totalRaffleTickets);
-                } 
-            }));
-        });
-
-        // Count All Doodles
-        await wait(1000 * 1) 
-        const allDoodles = totalDoodles+totalDoodlePunks+totalDoodleShadyz+totalLazyDoodles;
-        newEmbed.addField(dialoges[11],allDoodles.toString(),false);
-        interaction.editReply({embeds: [newEmbed]});
-
-        // Count Total Badges
-        await wait(1000 * 1) 
-        const allBadges = totalFusions+totalSilvers+totalGolds+totalDiamonds+totalEternals;
-        newEmbed.addField(dialoges[12],allBadges.toString(),false);
-        interaction.editReply({embeds: [newEmbed]});
-
-        // Count Roles Received
-        await wait(1000 * 1)
-        newEmbed.addField(dialoges[13],"Arc Collectors, Raffle Participants",false);
-        interaction.editReply({embeds: [newEmbed]});
-
-        // // Count Doodles
-        // content += "\n"+dialoges[1];
-        // await data.Doodles.forEach((token_id, index, array) => {
-        //     lookForDoodles(fireBaseDB,walletID,token_id,(numb => {
-        //         totalDoodles += numb;
-        //         interaction.editReply({content: content+totalDoodles});
-        //         itemsProccesed++
-        //         if(itemsProccesed === array.length){
-        //             content = content+totalDoodles;
-        //             content += "\n"+dialoges[2];
-        //             itemsProccesed = 0;
-        //             roleMap.push(totalDoodles);
-        //         }        
-        //     }));                       
-        // });
-
-        // // Count Doodle Punks
-        // await wait(1000 * 1)        
-        // await data.DoodlePunks.forEach((token_id, index, array) => {
-        //     lookForDoodles(fireBaseDB,walletID,token_id,(numb => {
-        //         totalDoodlePunks += numb;
-        //         interaction.editReply({content: content+totalDoodlePunks});
-        //         itemsProccesed++
-        //         if(itemsProccesed === array.length){
-        //             content = content+totalDoodlePunks;
-        //             content += "\n"+dialoges[3];
-        //             itemsProccesed = 0;
-        //             roleMap.push(totalDoodlePunks);
-        //         } 
-        //     }));
-        // });
-
-        // // Count Doodle Shadyz
-        // await wait(1000 * 1)
-        // await data.DoodleShadyz.forEach((token_id, index, array) => {
-        // lookForDoodles(fireBaseDB,walletID,token_id,(numb => {
-        //     totalDoodleShadyz += numb;
-        //     interaction.editReply({content: content+totalDoodleShadyz});
-        //     itemsProccesed++
-        //         if(itemsProccesed === array.length){
-        //             content = content+totalDoodleShadyz;
-        //             content += "\n"+dialoges[4];
-        //             itemsProccesed = 0;
-        //             roleMap.push(totalDoodleShadyz);
-        //         }
-        //     }));
-        // });
-
-        // // Count Lazy Doodles
-        // await wait(1000 * 1)
-        // await data.LazyDoodles.forEach((token_id, index, array) => {
-        //     lookForDoodles(fireBaseDB,walletID,token_id,(numb => {
-        //         totalLazyDoodles += numb;
-        //         interaction.editReply({content: content+totalLazyDoodles});
-        //         itemsProccesed++
-        //         if(itemsProccesed === array.length){
-        //             content = content+totalLazyDoodles;
-        //             content += "\n"+dialoges[5];
-        //             itemsProccesed = 0;
-        //             roleMap.push(totalLazyDoodles);
-        //         }
-        //     }));
-        // });
-
-        // // Count Fusions
-        // await wait(1000 * 1)
-        // const badges = data.Badges;
-        // await lookForBadges(fireBaseDB,walletID,badges.fusions,(numb => {
-        //         totalFusions += numb;
-        //         const newContent = (numb > 1) 
-        //             ? content+" Doodles: " : content+" Doodle: ";
-        //         interaction.editReply({content: newContent+totalFusions});
-        //         content = newContent+totalFusions;
-        //         content += "\n"+dialoges[6];
-        // }));
-
-        // // Count Silvers
-        // await wait(1000 * 1)
-        // await lookForBadges(fireBaseDB,walletID,badges.silvers,(numb => {
-        //         totalSilvers += numb;
-        //         const newContent = (numb > 1) 
-        //             ? content+" Doodles: " : content+" Doodle: ";
-        //         interaction.editReply({content: newContent+totalSilvers});
-        //         content = newContent+totalSilvers;
-        //         content += "\n"+dialoges[7];
-        // }));
-
-        // // Count Golds
-        // await wait(1000 * 1)
-        // await lookForBadges(fireBaseDB,walletID,badges.golds,(numb => {
-        //         totalGolds += numb;
-        //         const newContent = (numb > 1) 
-        //             ? content+" Doodles: " : content+" Doodle: ";
-        //         interaction.editReply({content: newContent+totalGolds});
-        //         content = newContent+totalGolds;
-        //         content += "\n"+dialoges[8];
-        // }));
-
-        // // Count Diamonds
-        // await wait(1000 * 1)
-        // await lookForBadges(fireBaseDB,walletID,badges.diamonds,(numb => {
-        //         totalDiamonds += numb;
-        //         const newContent = (numb > 1) 
-        //             ? content+" Doodles: " : content+" Doodle: ";
-        //         interaction.editReply({content: newContent+totalDiamonds});
-        //         content = newContent+totalDiamonds;
-        //         content += "\n"+dialoges[9];
-        // }));
-
-        // // Count Eternals
-        // await wait(1000 * 1)
-        // await lookForBadges(fireBaseDB,walletID,badges.eternals,(numb => {
-        //         totalEternals += numb;
-        //         const newContent = (numb > 1) 
-        //             ? content+" Doodles: " : content+" Doodle: ";
-        //         interaction.editReply({content: newContent+totalEternals});
-        //         content = newContent+totalEternals;
-        //         content += "\n"+dialoges[10];
-        // }));
-
-        // // Count Raffle Tickets
-        // await wait(1000 * 1)        
-        // await data.RaffleTickets.forEach((token_id, index, array) => {
-        //     lookForDoodles(fireBaseDB,walletID,token_id,(numb => {
-        //         totalRaffleTickets += numb;
-        //         interaction.editReply({content: content+totalRaffleTickets});
-        //         itemsProccesed++
-        //         if(itemsProccesed === array.length){
-        //             content = content+totalRaffleTickets;
-        //             content += "\n"+dialoges[11];
-        //             itemsProccesed = 0;
-        //             roleMap.push(totalRaffleTickets);
-        //         } 
-        //     }));
-        // });
-
-        // // Count All Doodles
-        // await wait(1000 * 1) 
-        // const allDoodles = totalDoodles+totalDoodlePunks+totalDoodleShadyz+totalLazyDoodles;
-        // content += allDoodles;
-        // await interaction.editReply({content: content});
-
-        // // Count Total Badges
-        // await wait(1000 * 1) 
-        // const allBadges = totalFusions+totalSilvers+totalGolds+totalDiamonds+totalEternals;
-        // content += "\n"+dialoges[12]+allBadges;
-        // roleMap.push(allBadges);
-        // await interaction.editReply({content: content});
-
-        // // Count Roles Received
-        // await wait(1000 * 1)
-        // content += "\n"+dialoges[13]+"Arc Collectors, Raffle Participants";
-        // await interaction.editReply({content: content});
+            await wait(1000 * 1)
+        }
     }
 }

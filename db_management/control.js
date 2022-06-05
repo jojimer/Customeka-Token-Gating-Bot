@@ -71,7 +71,7 @@ module.exports = {
         const serial_numbMin = (badge.length == 1) ? 1 : badge[1][0];
         const serial_numbMax = (badge.length == 1) ? 100 : badge[1][1];
         
-        const res = {};        
+        let res = {};
         let totalBadges = 0;
         const userNFTs = checkAccountBadges(account_id,token_id);
 
@@ -88,7 +88,7 @@ module.exports = {
                 const token_id = nft.token_id;
                 const serial_number = nft.serial_number;
 
-                if(serial_number < serial_numbMin && serial_number > serial_numbMax) return;
+                if((serial_number >= serial_numbMax || serial_number < serial_numbMin) && badge.length == 2) return;
                 
                 const dataString = `{
                     "token_id": "${token_id}",
