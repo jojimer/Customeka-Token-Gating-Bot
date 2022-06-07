@@ -33,10 +33,10 @@ module.exports = {
             if(!result){
                 let finalLoading = "|".repeat(100)+" 100%";
                 embed.setFooter({
-                    text: "The wallet ID you enetered is invalid, please try again!\n"+finalLoading,
+                    text: "The wallet ID you entered is invalid, please try again!\n"+finalLoading,
                     iconURL: icon.error
                 });
-                interaction.editReply({embeds: [embed]});
+                await interaction.editReply({embeds: [embed]});
             }
 
             await callback(result);

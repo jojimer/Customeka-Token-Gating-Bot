@@ -31,7 +31,7 @@ module.exports = {
         return axios.get(mainnet+next);
     },
     checkAccountBadges: (account_id,token_id) => {
-        NFTs = mainnet+`/api/v1/accounts/${account_id}/nfts?limit=100&token.id=${token_id}`;
+        const NFTs = mainnet+`/api/v1/accounts/${account_id}/nfts?limit=100&token.id=${token_id}`;
         return axios.get(NFTs);
     }
 }

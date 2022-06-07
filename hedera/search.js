@@ -8,7 +8,7 @@ module.exports = {
             const validated = (typeof data.account == "string") ? true : false;
             await callback(validated);
         }).catch(async err => {
-            console.log(err.response.status)
+            console.log("Invalid wallet ID",err.response.status)
             await callback(false);
         })
     },

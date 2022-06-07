@@ -27,7 +27,7 @@ module.exports = {
 
         const newEmbed = new MessageEmbed()
         .setColor('RANDOM').setTitle(content)
-        .setDescription(walletID).setFooter({text: "| 0%", iconURL: icon.start});
+        .setDescription(walletID).setFooter({text: "| 0%", iconURL: icon.loading});
 
         // Process Initial Bot Reply
         await interaction.reply({
@@ -40,21 +40,18 @@ module.exports = {
         const userData = {id: user.id, username: user.username, vip: false, walletID: walletID };
 
         // Check if WalletID is valid
-        await validateWalletID(walletID,interaction,newEmbed,(result => {
-            walletValidity = result;
+        await validateWalletID(walletID,interaction,newEmbed,(async result => {
+            if(!result) return;
+
+            // Check if user already on the database with valid wallet ID
+            // 0.0577399
+
+            // Submit Data to firebase
+            await addUser(fireBaseDB,userData);
+
+            await wait(500);
+            // Search NFTs and Badges
+            await processWallet(walletID,interaction,newEmbed);
         }));
-
-        // Check if wallet is invalid
-        if(!walletValidity) return;
-
-        await wait(500);
-
-        // Submit Data to firebase
-        await addUser(fireBaseDB,userData);
-
-        await wait(500);
-
-        // Search NFTs and Badges
-        await processWallet(walletID,interaction,newEmbed);
     }
 }
