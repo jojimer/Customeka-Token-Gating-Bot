@@ -25,7 +25,6 @@ module.exports = {
             raffleTickets: { roleName: "Raffle Participants", token_id: ["0.0.858134"]}
         },
         Dialoges: [
-            'Please wait while we process your WalletID: ',
             {type: 'doodle', key: 'Doodles',content: 'Doodles: ', total: 0},
             {type: 'doodle', key: 'DoodlePunks',content: 'Doodle Punks: ', total: 0},
             {type: 'doodle', key: 'DoodleShadyz',content: 'Doodle Shadyz: ', total: 0},

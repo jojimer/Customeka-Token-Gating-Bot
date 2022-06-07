@@ -18,6 +18,12 @@ global.fireBaseDB = getFirestore();
 // Set Global Root
 global.appRoot = path.resolve(__dirname);
 
+global.icon = {
+	loading: "https://firebasestorage.googleapis.com/v0/b/discordbot-db-40708.appspot.com/o/spiral_loading.gif?alt=media&token=824a63c3-a4c7-43d7-8a38-83913c590a60",
+	success: "https://firebasestorage.googleapis.com/v0/b/discordbot-db-40708.appspot.com/o/c.png?alt=media&token=924d41ba-b687-47ed-9f0f-be0036b70900",
+	error: "https://firebasestorage.googleapis.com/v0/b/discordbot-db-40708.appspot.com/o/x.png?alt=media&token=7a2c0bbf-3df6-49f4-9852-b2fc8ef3fb09"
+}
+
 // Collection Holder Ref
 //const holder = collection(db, 'holder');
 
