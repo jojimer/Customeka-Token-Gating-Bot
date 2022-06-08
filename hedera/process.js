@@ -1,4 +1,5 @@
 const { searchAccount, searchNFTs, searchBadges } = require('./search');
+const { addUser, isUserExist } = require(appRoot+'/db_management/control');
 const { data } = require('./nfts');
 const wait = require('node:timers/promises').setTimeout;
 
@@ -9,9 +10,12 @@ const defaultData = {
     roles: data.Roles,
     rolesReceived: [],
     randomNumb: () => ~~(Math.random() * (7 - 5 + 5) + 5),
-    noNFTs: "Sorry you don't have any Doodle in your wallet!",
-    walletIdClamed: "The wallet ID you entered has been recorded under Doodle Member:[Member User Name]",
-    directToSupportTicket: "Please reach out our team if you need a technical support by making a ticket on #-Ticket Support Channel"
+    noNFTs: { bool: true, content: "Sorry you don't have any Doodle in your wallet!" },
+    validateDialoge: {
+        invalidWalletID: "The wallet ID you entered is invalid, please try again!\n",
+        walletIdClamed: "The wallet ID you entered has been recorded under Doodle Member: ",
+        directToSupportTicket: "Please reach out our team if you need a technical support by making a ticket on #-Ticket Support Channel"
+    }
 }
 
 // Roles Identifyer
@@ -29,22 +33,40 @@ const roleIdentifyer = async (token_id) => {
 
 module.exports = {
     validateWalletID: (account_id, interaction, embed, callback) => {
-        searchAccount(account_id,(async result => {
-            if(!result){
-                let finalLoading = "|".repeat(100)+" 100%";
-                embed.setFooter({
-                    text: "The wallet ID you entered is invalid, please try again!\n"+finalLoading,
-                    iconURL: icon.error
-                });
-                await interaction.editReply({embeds: [embed]});
-            }
+        const dialoge = defaultData.validateDialoge;        
+        const reply = (d) => {
+            let finalLoading = "|".repeat(100/ 1.75)+" 100%";
+            return embed.setFooter({
+                text: d+finalLoading,
+                iconURL: icon.error
+            });            
+        }
 
-            await callback(result);
+        // Search user wallet ID in mirror-node
+        searchAccount(account_id,(async confirmation => {
+            // Get validity account_id confirmation
+            if(!confirmation){
+                let message = reply(dialoge.invalidWalletID);
+                await interaction.editReply({embeds: [message]});
+                callback(false);
+            }else{
+                // Check if user already on the database with valid wallet ID
+                isUserExist(fireBaseDB,account_id,(async user => {
+                    if(user !== false){
+                        let message = reply(dialoge.walletIdClamed+"\n\n- @"+user[0].username+"\n\n");
+                        interaction.editReply({embeds: [message]});
+                        callback(false);
+                    }else{
+                        callback(true);
+                    }
+                }));
+            }
         }));
     },
     processWallet: async (walletID,interaction,embed) => {
         const dialoges = defaultData.dialoges;
         const badges = defaultData.badges;
+        const noNFTs = defaultData.noNFTs;
         const rolesReceived = defaultData.rolesReceived;
         const randomNumb = defaultData.randomNumb;
         let itemsProccesed = 0;
@@ -74,8 +96,8 @@ module.exports = {
                             embed.addField(content,dialoges[i].total.toString(),false);
                             interaction.editReply({embeds: [embed]});
                             itemsProccesed = 0;
+                            if(noNFTs.bool && dialoges[i].total > 0) noNFTs.bool = false;
                             dialoges[i].total = 0;
-                            return;
                         }        
                     }));
 
@@ -92,8 +114,8 @@ module.exports = {
                         const sp = (numb > 1) ? " Badges: " : " Badge: ";
                         embed.addField(content+sp,badges.toString(),false);
                         interaction.editReply({embeds: [embed]});
+                        if(noNFTs.bool && dialoges[i].total > 0) noNFTs.bool = false;
                         dialoges[i].total = 0;
-                        return;
                 }));
 
             if(type === 'dialoge' && key === 'TotalDoodle'){
@@ -116,24 +138,32 @@ module.exports = {
 
             // Total Roles Received
             if(key === 'Roles'){
-                let allRoles = "";
-                let finalDialoge = (rolesReceived.length > 1) 
-                    ? dialoges[i].content+"s: " : dialoges[i].content;
-                rolesReceived.map(key => { allRoles += "- "+data.Roles[`${key}`].roleName+"\n"; });
+                const iconURL = (noNFTs.bool) ? icon.error : icon.success;           
+                const finalDialoge = [];
 
-                let finalLoading = "|".repeat(100)+" 100%";
+                if(!noNFTs.bool) {    
+                    finalDialoge[0] = (rolesReceived.length > 1) ? dialoges[i].content+"s: " : dialoges[i].content;
+                    rolesReceived.map(key => { finalDialoge[1] += "- "+data.Roles[`${key}`].roleName+"\n"; });
+                    finalDialoge[0] += "\n\n"+finalDialoge[1];
+                }else{
+                    finalDialoge[0] = noNFTs.content;
+                }
+
+                let finalLoading = "|".repeat(100 / 1.75)+" 100%";
                 embed.setFooter({
-                    text: finalDialoge+"\n\n"+allRoles+"\n"+finalLoading,
-                    iconURL: icon.success
+                    text: finalDialoge[0]+"\n"+finalLoading,
+                    iconURL: iconURL
                 });
+
                 interaction.editReply({embeds: [embed]});
                 rolesReceived.length = 0;
+                noNFTs.bool = true;
                 loading = 0;
             }else{
                 loading += randomNumb();
                 if(loading >= 100 ) loading = 98;
                 embed.setFooter({
-                    text: "|".repeat(loading)+" "+loading+"%",
+                    text: "|".repeat(loading / 1.75)+" "+loading+"%",
                     iconURL: icon.loading
                 });
                 interaction.editReply({embeds: [embed]});

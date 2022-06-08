@@ -6,7 +6,7 @@ module.exports = {
         pinned: new MessageEmbed()
         .setColor('GREEN')
         .setDescription('Click button to connect!')
-        .setImage('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREeGkthS-wMCASLF1TtH1rR8jueTwLRojuDw&usqp=CAU'),
+        .setImage('https://firebasestorage.googleapis.com/v0/b/discordbot-db-40708.appspot.com/o/numbpad_2_50.jpeg?alt=media&token=45cc2d32-cffc-4ce8-8cb5-585f9c68b005'),
         button: new MessageActionRow().addComponents(
             new MessageButton()
                 .setCustomId('connectWalletId')

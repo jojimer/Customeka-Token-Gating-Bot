@@ -1,5 +1,4 @@
 const { MessageActionRow, Modal, TextInputComponent, MessageEmbed } = require('discord.js');
-const { addUser } = require(appRoot+'/db_management/control');
 const { validateWalletID, processWallet } = require(appRoot+'/hedera/process');
 const wait = require('node:timers/promises').setTimeout;
 const findRole = (cache,roleId) => { return cache.find(r => r.id === roleId); };
@@ -41,17 +40,18 @@ module.exports = {
 
         // Check if WalletID is valid
         await validateWalletID(walletID,interaction,newEmbed,(async result => {
-            if(!result) return;
+            if(result) {
 
-            // Check if user already on the database with valid wallet ID
-            // 0.0577399
+                // 0.0577399 wallet ID with empty doodle
 
-            // Submit Data to firebase
-            await addUser(fireBaseDB,userData);
+                await wait(500);
+                // Submit Data to firebase
+                //await addUser(fireBaseDB,userData);
 
-            await wait(500);
-            // Search NFTs and Badges
-            await processWallet(walletID,interaction,newEmbed);
+                await wait(500);
+                // Search NFTs and Badges
+                await processWallet(walletID,interaction,newEmbed);
+            }
         }));
     }
 }

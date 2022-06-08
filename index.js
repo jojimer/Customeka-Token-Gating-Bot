@@ -5,7 +5,6 @@ const path = require('node:path');
 const { firebaseConfig } = require('./firebase');
 const { initializeApp } = require('firebase/app');
 const { getFirestore } = require('firebase/firestore');
-const { collection, getDocs, getDoc, deleteDoc, doc, onSnapshot, query, where, orderBy } = require('firebase/firestore');
 
 require('dotenv').config();
 
