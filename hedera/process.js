@@ -1,6 +1,8 @@
 const { searchAccount, searchNFTs, searchBadges } = require('./search');
-const { addUser, isUserExist } = require(appRoot+'/db_management/control');
+const { addUser, addHolderData, isAccountExist } = require(appRoot+'/db_management/control');
+const { Timestamp, doc } = require('firebase/firestore')
 const { data } = require('./nfts');
+const TokenGenerator = require('uuid-token-generator');
 const wait = require('node:timers/promises').setTimeout;
 
 // Get Default Data(Dialoges, Type, Keys)
@@ -33,7 +35,8 @@ const roleIdentifyer = async (token_id) => {
 
 module.exports = {
     validateWalletID: (account_id, interaction, embed, callback) => {
-        const dialoge = defaultData.validateDialoge;        
+        const dialoge = defaultData.validateDialoge;
+        const currentUser = interaction.user.id;
         const reply = (d) => {
             let finalLoading = "|".repeat(100/ 1.75)+" 100%";
             return embed.setFooter({
@@ -51,8 +54,8 @@ module.exports = {
                 callback(false);
             }else{
                 // Check if user already on the database with valid wallet ID
-                isUserExist(fireBaseDB,account_id,(async user => {
-                    if(user !== false){
+                isAccountExist(fireBaseDB,account_id,(async user => {
+                    if(user && currentUser !== user[0].id){
                         let message = reply(dialoge.walletIdClamed+"\n\n- @"+user[0].username+"\n\n");
                         interaction.editReply({embeds: [message]});
                         callback(false);
@@ -69,6 +72,30 @@ module.exports = {
         const noNFTs = defaultData.noNFTs;
         const rolesReceived = defaultData.rolesReceived;
         const randomNumb = defaultData.randomNumb;
+        const keyExpiration = (Date.now() + 60000*16);
+
+        // Collect User Data
+        const user = interaction.user;
+        const userData = {
+            id: user.id, 
+            username: user.username,
+            verified: "pending",
+            verification_key: {
+                generated_key: new TokenGenerator().generate(),
+                time: Timestamp.fromMillis(keyExpiration),
+            },
+            holders_data: doc(fireBaseDB,'holders',user.id),
+            vip: false,
+            walletID: walletID 
+        };
+
+        const holderData = {
+            id: user.id,
+            username: user.username,
+            nfts: {},
+            roles: {}
+        };
+
         let itemsProccesed = 0;
         let loading = 0;
 
@@ -82,9 +109,14 @@ module.exports = {
 
             if(type === 'doodle' || type === 'raffleTicket')
                 await tokenIDs.forEach(async token_id => {
-                    searchNFTs(walletID,token_id,(numb => {
+                    searchNFTs(walletID,token_id,(data => {
+                        const numb = data.total;                        
                         // Get Role
-                        if(numb !== 0) roleIdentifyer(token_id);
+                        if(numb !== 0) {
+                            roleIdentifyer(token_id);
+                            holderData.nfts[`${token_id}`] = data.nft[`${token_id}`];
+                        }
+
                         // Increment Number Doodle in Single Token ID
                         if(numb > 0) dialoges[i].total += numb;
                         // Increment Overall Doodles
@@ -105,17 +137,22 @@ module.exports = {
                 });
 
             if(type === 'badge')
-                await searchBadges(walletID,tokenIDs,(numb => {
-                        // Increment Number of Badges in single Token ID
-                        if(numb !== 0) roleIdentifyer(tokenIDs[0]);
-                        const badges = dialoges[i].total += numb;
-                        // Increment Overall Badges
-                        if(numb > 0) dialoges[11].total += badges;
-                        const sp = (numb > 1) ? " Badges: " : " Badge: ";
-                        embed.addField(content+sp,badges.toString(),false);
-                        interaction.editReply({embeds: [embed]});
-                        if(noNFTs.bool && dialoges[i].total > 0) noNFTs.bool = false;
-                        dialoges[i].total = 0;
+                await searchBadges(walletID,tokenIDs,key,(data => {
+                    const numb = data.total;
+                    // Increment Number of Badges in single Token ID
+                    if(numb !== 0){
+                        roleIdentifyer(tokenIDs[0]);
+                        holderData.roles[`${key}`] = data.badges[`${key}`];
+                    }
+
+                    const badges = dialoges[i].total += numb;
+                    // Increment Overall Badges
+                    if(numb > 0) dialoges[11].total += badges;
+                    const sp = (numb > 1) ? " Badges: " : " Badge: ";
+                    embed.addField(content+sp,badges.toString(),false);
+                    interaction.editReply({embeds: [embed]});
+                    if(noNFTs.bool && dialoges[i].total > 0) noNFTs.bool = false;
+                    dialoges[i].total = 0;
                 }));
 
             if(type === 'dialoge' && key === 'TotalDoodle'){
@@ -139,7 +176,7 @@ module.exports = {
             // Total Roles Received
             if(key === 'Roles'){
                 const iconURL = (noNFTs.bool) ? icon.error : icon.success;           
-                const finalDialoge = [];
+                const finalDialoge = [[""],[""]];
 
                 if(!noNFTs.bool) {    
                     finalDialoge[0] = (rolesReceived.length > 1) ? dialoges[i].content+"s: " : dialoges[i].content;
@@ -171,5 +208,9 @@ module.exports = {
 
             await wait(1000 * 1)
         }
+
+        //console.log("Holder Data:",holderData.roles)
+        await addUser(fireBaseDB,userData);
+        await addHolderData(fireBaseDB,holderData);
     }
 }

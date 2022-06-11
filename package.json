@@ -16,7 +16,9 @@
     "discord-api-types": "^0.32.1",
     "discord.js": "^13.6.0",
     "dotenv": "^16.0.1",
-    "firebase": "^9.8.1"
+    "firebase": "^9.8.1",
+    "firebase-admin": "^10.3.0",
+    "uuid-token-generator": "^1.0.0"
   },
   "devDependencies": {
     "eslint": "^8.15.0"

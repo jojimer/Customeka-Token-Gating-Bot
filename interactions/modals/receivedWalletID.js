@@ -32,22 +32,13 @@ module.exports = {
         await interaction.reply({
             embeds: [newEmbed],
             ephemeral: true
-        });        
-
-        // Collect User Data
-        const user = interaction.user;
-        const userData = {id: user.id, username: user.username, vip: false, walletID: walletID };
+        });
 
         // Check if WalletID is valid
         await validateWalletID(walletID,interaction,newEmbed,(async result => {
             if(result) {
 
                 // 0.0577399 wallet ID with empty doodle
-
-                await wait(500);
-                // Submit Data to firebase
-                //await addUser(fireBaseDB,userData);
-
                 await wait(500);
                 // Search NFTs and Badges
                 await processWallet(walletID,interaction,newEmbed);

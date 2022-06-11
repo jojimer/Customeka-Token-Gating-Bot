@@ -21,7 +21,6 @@ module.exports = {
             const serial_number = nft.serial_number;
             const dataString = `{
                 "token_id": "${token_id}",
-                "account_id": "${account_id}",
                 "serial_number": ${serial_number}
             }`;
             const obj = JSON.parse(dataString);
@@ -33,7 +32,10 @@ module.exports = {
             next = data.links.next;
 
             if(data.nfts.length == 0){
-                await callback(totalDoodles);
+                await callback({
+                    total: totalDoodles,
+                    nft: res,
+                });
                 return;
             }
 
@@ -69,44 +71,56 @@ module.exports = {
 
             //console.log(Object.keys(res[`${token_id}`]).length,res);
             totalDoodles += Object.keys(res[`${token_id}`]).length;
-            await callback(totalDoodles);     
+            await callback({
+                total: totalDoodles,
+                nft: res,
+            });     
         })
     },
-    searchBadges: async (account_id, badge, callback) => {
+    searchBadges: async (account_id, badge, key, callback) => {
         const token_id = badge[0];
-        const serial_numbMin = (badge.length == 1) ? 1 : badge[1][0];
-        const serial_numbMax = (badge.length == 1) ? 100 : badge[1][1];
+        const badge_pool_reward = badge[1];
+        const serial_numbMin = (badge.length == 2) ? 1 : badge[2][0];
+        const serial_numbMax = (badge.length == 2) ? 100 : badge[2][1];
         
-        let res = {};
+        const res = {};
         let totalBadges = 0;
         const userNFTs = checkAccountBadges(account_id,token_id);
 
         userNFTs.then(async result => {
             const data = result.data.nfts;
             if(data.length == 0){
-                callback(totalBadges);
+                callback({
+                    total: totalBadges,
+                    badges: res,
+                });
                 return;
             };
 
-            res[`${token_id}`] = {};
+            res[`${key}`] = {};
             await data.map(nft => {
-                const account_id = nft.account_id;
                 const token_id = nft.token_id;
                 const serial_number = nft.serial_number;
 
-                if((serial_number >= serial_numbMax || serial_number < serial_numbMin) && badge.length == 2) return;
+                if((serial_number >= serial_numbMax || serial_number < serial_numbMin) && badge.length == 3) return;
                 
                 const dataString = `{
                     "token_id": "${token_id}",
-                    "account_id": "${account_id}",
-                    "serial_number": ${serial_number}
+                    "serial_number": ${serial_number},
+                    "reward_pool": ${badge_pool_reward},
+                    "share_value": "100%"
                 }`;
                 const obj = JSON.parse(dataString);
-                res[`${token_id}`][`${serial_number}`] = obj;
+                res[`${key}`][`${serial_number}`] = obj;
             })
 
-            totalBadges += Object.keys(res[`${token_id}`]).length;
-            await callback(totalBadges);
+            totalBadges += Object.keys(res[`${key}`]).length;
+            res[`${key}`].token_id = token_id;
+
+            await callback({
+                total: totalBadges,
+                badges: res,
+            }); 
         }).catch(err => {
             console.log(err)
         })

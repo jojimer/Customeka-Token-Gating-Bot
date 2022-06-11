@@ -5,7 +5,11 @@ module.exports = {
         const docRef = doc(db,'users',data.id);
         setDoc(docRef,data);
     },
-    isUserExist: (db,account_id,callback) => {
+    addHolderData: (db,data) => {
+        const docRef = doc(db,'holders',data.id);
+        setDoc(docRef,data);
+    },
+    isAccountExist: (db,account_id,callback) => {
         const colRef = collection(db,'users');
         const q = query(colRef, where("walletID", "==", account_id));
         getDocs(q).then(snapshot => {

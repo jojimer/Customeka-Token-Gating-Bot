@@ -2,8 +2,8 @@
 const { Client, Collection, Intents } = require('discord.js');
 const { loadCommands, loadButtons, loadModals, loadEvents } = require('./loader');
 const path = require('node:path');
-const { firebaseConfig } = require('./firebase');
 const { initializeApp } = require('firebase/app');
+const { firebaseConfig } = require('./firebase');
 const { getFirestore } = require('firebase/firestore');
 
 require('dotenv').config();
@@ -13,7 +13,7 @@ initializeApp(firebaseConfig);
 
 // Firestore Init Services
 global.fireBaseDB = getFirestore();
-		
+
 // Set Global Root
 global.appRoot = path.resolve(__dirname);
 
