@@ -6,6 +6,8 @@ module.exports = {
 	once: true,
 	execute(client) {
 		console.log(`Ready! Logged in as ${client.user.tag}`);
+		// const claim = client.buttons.find(btn => btn.data.claimBTN).data.claimBTN.components[0];
+		// console.log(claim)
 
 		// Stop Connecting the guild
 		init.validate(fireBaseDB).then(guilds => {

@@ -21,7 +21,6 @@ module.exports = {
     async execute(interaction) {
         // Get Wallet ID
         const walletID = interaction.fields.getTextInputValue('walletID');
-        let walletValidity = false;
         let content = "Please wait while we process your WalletID: ";
 
         const newEmbed = new MessageEmbed()

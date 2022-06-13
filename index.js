@@ -3,10 +3,9 @@ const { Client, Collection, Intents } = require('discord.js');
 const { loadCommands, loadButtons, loadModals, loadEvents } = require('./loader');
 const path = require('node:path');
 const { initializeApp } = require('firebase/app');
-const { firebaseConfig } = require('./firebase');
 const { getFirestore } = require('firebase/firestore');
-
 require('dotenv').config();
+const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
 
 // Firebase Config
 initializeApp(firebaseConfig);

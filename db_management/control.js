@@ -9,6 +9,10 @@ module.exports = {
         const docRef = doc(db,'holders',data.id);
         setDoc(docRef,data);
     },
+    addVerificationLink: (db,data) => {
+        const docRef = doc(db,'verification_key',data.id);
+        setDoc(docRef,data);
+    },
     isAccountExist: (db,account_id,callback) => {
         const colRef = collection(db,'users');
         const q = query(colRef, where("walletID", "==", account_id));
@@ -17,6 +21,8 @@ module.exports = {
             snapshot.docs.forEach((doc) => {
                 userData.push({ ...doc.data(), id: doc.id });
             });
+
+            // Set false if no record of wallet ID in the firebase
             let result = (userData.length) ? userData : false;
             callback(result);
         });
