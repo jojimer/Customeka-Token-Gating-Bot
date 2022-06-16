@@ -6,27 +6,30 @@ module.exports = {
 	once: true,
 	execute(client) {
 		console.log(`Ready! Logged in as ${client.user.tag}`);
-		// const claim = client.buttons.find(btn => btn.data.claimBTN).data.claimBTN.components[0];
-		// console.log(claim)
+		// Set New Name
+		//client.user.setUsername("Serpent Bot");
+
+		// Set New Avatar Icon
+		//client.user.setAvatar("https://connect.customeka.xyz/images/serp_logo1.png");
 
 		// Stop Connecting the guild
 		init.validate(fireBaseDB).then(guilds => {
 			// Map All Registered guild
-			Object.keys(guilds).map(id => {
+			Object.keys(guilds).map(async id => {
 
 				// Guild Object 
 				const guild = guilds[`${id}`];
 
 				// Channel ID
-				const chID = guild.channel;
+				const connectChannel = guild.channels.connect;
 
-				// Check if guild is pause from receiving services
-				if(!guilds[`${id}`].pause) {				
+				// Check if guild is pause from receiving services 
+				if(!guild.pause) {
 
 					// Send Bot Initial Message if channel is new
-					client.channels.cache.get(chID).messages.fetch({ limit: 1 }).then(message => {
+					client.channels.cache.get(connectChannel).messages.fetch({ limit: 1 }).then(message => {
 						if(!message.first()) {
-							client.channels.cache.get(chID).send({content: 'Hello from DoodleBot', embeds: [data.pinned], components: [data.button]});
+							client.channels.cache.get(connectChannel).send({content: guild.greetings, embeds: [data.pinned], components: [data.button]});
 						}
 					})
 
@@ -36,10 +39,7 @@ module.exports = {
 				if(!guild.new) return;
 
 				//console.log(client.guilds.cache.get(id).memberCount)
-				
 			})			
 		});
-
-		// Continue with other services
 	},
 };

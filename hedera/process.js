@@ -1,29 +1,35 @@
 const { searchAccount, searchNFTs, searchBadges } = require('./search');
-const { addUser, addHolderData, addVerificationLink, isAccountExist } = require(appRoot+'/db_management/control');
-const { Timestamp, doc } = require('firebase/firestore')
-const { data } = require('./nfts');
+const { addUser, addHolderData, addVerificationLink, isAccountExist, updateUserAccount } = require(appRoot+'/db_management/control');
+const { Timestamp, doc, onSnapshot, collection, query, orderBy, where } = require('firebase/firestore');
+const { doodleNFTs } = require('./nfts');
 const TokenGenerator = require('uuid-token-generator');
 const wait = require('node:timers/promises').setTimeout;
-const baseURL = "http://localhost:9000/#/";
+const baseURL = "https://connect.customeka.xyz/";
 
 // Get Default Data(Dialoges, Type, Keys)
-const defaultData = {
-    dialoges: data.Dialoges,
-    badges: data.Badges,
-    roles: data.Roles,
-    rolesReceived: [],
-    randomNumb: () => ~~(Math.random() * (7 - 5 + 5) + 5),
-    noNFTs: { bool: true, content: "Sorry you don't have any Doodle in your wallet!" },
-    validateDialoge: {
-        invalidWalletID: "The wallet ID you entered is invalid, please try again!\n",
-        walletIdClamed: "The wallet ID you entered has been recorded under Doodle Member: ",
-        alreadyVerified: "Your account and wallet ID is already verified! ",
-        directToSupportTicket: "Please reach out our team if you need a technical support by making a ticket on #-Ticket Support Channel"
+const defaultD = (data) => {
+    return {
+        dialoges: data.Dialoges,
+        badges: data.Badges,
+        roles: data.Roles,
+        rolesReceived: [],
+        webhook: data.webhook,
+        randomNumb: () => ~~(Math.random() * (7 - 5 + 5) + 5),
+        noNFTs: { bool: true, content: "Sorry you don't have any "+data.memberCalled+" in your wallet!" },
+        validateDialoge: {
+            invalidWalletID: "The wallet ID you entered is invalid, please try again!\n",
+            walletIdClamed: "The wallet ID you entered has been recorded under "+data.memberCalled+" Member: ",
+            alreadyVerified: "Your account and wallet ID is already verified! ",
+            directToSupportTicket: "Please reach out our team if you need a technical support by making a ticket on #-Ticket Support Channel"
+        },
+        channel: data.channel,
+        projectKey: data.projectKey,
+        everyone: data.everyone
     }
 }
 
 // Roles Identifyer
-const roleIdentifyer = async (token_id) => {
+const roleIdentifyer = async (token_id,defaultData) => {
     const roles = defaultData.roles;
 
     let choices = Object.keys(roles).filter(key => {
@@ -35,13 +41,65 @@ const roleIdentifyer = async (token_id) => {
     defaultData.rolesReceived.push(...choices);        
 }
 
+// Add Roles and Mention user
+const shoutOut = (interaction,discord_id) => {
+    // Send Announcement when someone claim roles
+		// collection ref
+		const colRef = collection(fireBaseDB, 'users')
+
+		// queries
+		const q = query(colRef, where("verified", "==", "claiming"),orderBy('verification_time'))
+
+        const findRole = (cache,roleId) => { return cache.find(r => r.id === roleId); };
+
+		// realtime collection data
+		const unsubscribe = onSnapshot(q, (snapshot) => {
+            let users = []
+            snapshot.docs.forEach(doc => {
+                users.push({ ...doc.data(), id: doc.id })
+            })
+
+            users.map(u => {
+                const channel_id = u.discord_server.channel_id;
+                let content = `<@${u.id}> Just Entered the server.\n `;
+                let role;
+
+                u.roles.map(r => {
+                    role = `<@&${r.role_id}> `;
+                    content += role;
+                    interaction.member.roles.add(
+                        findRole(interaction.guild.roles.cache,r.role_id)
+                    )                      
+                })
+                interaction.client.channels.cache.get(channel_id).send({content: content});
+                updateUserAccount(fireBaseDB,discord_id,{verified:"claimed"});
+                unsubscribe();
+            })
+        })
+
+        // Add / Remove Members
+        // const user = '5454654687868768'
+        // const role = '451079228381724672'
+        // client.on('guildMemberAdd', async member => {
+        //     const memberID = '5454654687868768';   // you want to add/remove roles. Only members have roles not users. So, that's why I named the variable memberID for keeping it clear.
+        //     const roleID = '451079228381724672';
+        
+        //     const guild = client.guilds.cache.get('guild-ID');   // copy the id of the server your bot is in and paste it in place of guild-ID.
+        //     const role = guild.roles.cache.get(roleID);  // here we are getting the role object using the id of that role.
+        //     const member = await guild.members.fetch(memberID); // here we are getting the member object using the id of that member. This is the member we will add the role to.
+        //     member.roles.add(role);   // here we just added the role to the member we got.
+        // }
+}
+
 module.exports = {
     validateWalletID: (account_id, interaction, embed, callback) => {
+        const data = (true) ? doodleNFTs : "";
+        const defaultData = defaultD(data);
         const dialoge = defaultData.validateDialoge;
         const currentUser = interaction.user.id;
         const claimBTN = interaction.client.buttons.find(btn => btn.data.claimBTN).data.claimBTN;
         const reply = (d,i = 'error') => {
-            let finalLoading = "|".repeat(100/ 1.75)+" 100%";
+            let finalLoading = "|".repeat(100/ 1.8)+" 100%";
             return embed.setFooter({
                 text: d+finalLoading,
                 iconURL: icon[`${i}`]
@@ -52,7 +110,7 @@ module.exports = {
             const timeLeft = expiration.seconds - Timestamp.now().seconds;
             let minutes = Math.floor(timeLeft / 60);
             let seconds = timeLeft % 60;
-            return minutes + ":" + (seconds < 10 ? '0' : '') + seconds + (minutes > 1 ? ' minutes' : ' minute');
+            return minutes + (minutes > 1 ? ' minutes' : ' minute') + ' and ' + (seconds < 10 ? '0' : '') + seconds + (seconds > 1 ? ' seconds' : ' second');
         }
 
         // Search user wallet ID in mirror-node
@@ -75,18 +133,32 @@ module.exports = {
                         callback(false);
                     
                     // Check if current user is verified
-                    }else if(user && user.verified === 'true'){
+                    }else if(user && user.verified === 'claimed'){
                         let message = reply(dialoge.alreadyVerified+"\n\n",'success');
                         interaction.editReply({embeds: [message]});
                         callback(false);
 
                     // Check if current user still have time to verify account
                     }else if(user && user.verification_time.seconds > Timestamp.now().seconds){
-                        if(user.roles.length === 1) claimBTN.components[0].setLabel('Claim Role');
-                        claimBTN.components[0].setURL(baseURL+"doodleverse/"+user.verification_key);
                         let roles = "";
-                        user.roles.map(val => roles+= val+"\n" );
-                        let message = reply('You still have '+calculateTime(user.verification_time)+' to claim your roles: \n\n'+roles+'\n\n','success')
+                        let roleText = "roles:";
+
+                        // Chage text if role is equal to 1
+                        if(user.roles.length === 1){
+                            claimBTN.components[0].setLabel('Claim Role');
+                            roleText = "role:";
+                        }
+
+                        // Set button URL
+                        claimBTN.components[0].setURL(baseURL+`${defaultData.projectKey}/`+user.verification_key);
+
+                        // Load roles from Array                      
+                        user.roles.map(val => roles+= val.name+"\n" );
+
+                        // Set Embed Message
+                        let message = reply('You still have '+calculateTime(user.verification_time)+' to claim your '+roleText+' \n\n'+roles+'\n\n','success')
+                        
+                        // Send Edit Reply Embeds & Button
                         interaction.editReply({embeds: [message], components: [claimBTN]});
                         callback(false);
                     }else{                       
@@ -98,6 +170,8 @@ module.exports = {
         }));
     },
     processWallet: async (walletID,interaction,embed) => {
+        const data = (true) ? doodleNFTs : "";
+        const defaultData = defaultD(data);
         const dialoges = defaultData.dialoges;
         const badges = defaultData.badges;
         const noNFTs = defaultData.noNFTs;
@@ -120,6 +194,7 @@ module.exports = {
             vip: false,
             walletID: walletID,
             roles: []
+            
         };
 
         const verifyData = {
@@ -127,15 +202,17 @@ module.exports = {
             time: verificationTime,
             discord_id: user.id,
             wallet_id: walletID,
-            projectName: 'doodleverse',
-            roles: []
+            projectName: defaultData.projectKey,
+            roles: [{name: "everyone",role_id: defaultData.everyone}],
+            complete: false,
+            redirect: defaultData.channel.announcement
         }
 
         const holderData = {
             id: user.id,
             username: user.username,
             nfts: {},
-            roles: {}
+            badges: {}
         };
 
         let itemsProccesed = 0;
@@ -155,7 +232,7 @@ module.exports = {
                         const numb = data.total;                        
                         // Get Role
                         if(numb !== 0) {
-                            roleIdentifyer(token_id);
+                            roleIdentifyer(token_id,defaultData);
                             holderData.nfts[`${token_id}`] = data.nft[`${token_id}`];
                         }
 
@@ -183,8 +260,8 @@ module.exports = {
                     const numb = data.total;
                     // Increment Number of Badges in single Token ID
                     if(numb !== 0){
-                        roleIdentifyer(tokenIDs[0]);
-                        holderData.roles[`${key}`] = data.badges[`${key}`];
+                        roleIdentifyer(tokenIDs[0],defaultData);
+                        holderData.badges[`${key}`] = data.badges[`${key}`];
                     }
 
                     const badges = dialoges[i].total += numb;
@@ -220,19 +297,25 @@ module.exports = {
                 const iconURL = (noNFTs.bool) ? icon.error : icon.success;           
                 const finalDialoge = [[""],[""]];
 
-                if(!noNFTs.bool) {    
+                if(!noNFTs.bool) {
                     finalDialoge[0] = (rolesReceived.length > 1) ? dialoges[i].content+"s: " : dialoges[i].content;
-                    rolesReceived.map(key => { 
-                        finalDialoge[1] += "- "+data.Roles[`${key}`].roleName+"\n";
-                        userData.roles.push(data.Roles[`${key}`].roleName);
-                        verifyData.roles.push(data.Roles[`${key}`].roleName);
+                    rolesReceived.map(key => {
+                        finalDialoge[1] += "- "+defaultData.roles[`${key}`].roleName+"\n";
+
+                        const role = {
+                            name: defaultData.roles[`${key}`].roleName,
+                            role_id: defaultData.roles[`${key}`].role_id
+                        };
+
+                        userData.roles.push(role);
+                        verifyData.roles.push(role);
                     });
-                    finalDialoge[0] += "\n\n"+finalDialoge[1];
+                    finalDialoge[0] += "\n\n"+finalDialoge[1]+"\n\nLink will expire in 15 minutes, claim roles now!";
                 }else{
                     finalDialoge[0] = noNFTs.content;
                 }
 
-                let finalLoading = "|".repeat(100 / 1.75)+" 100%";
+                let finalLoading = "|".repeat(100 / 1.8)+" 100%";
                 embed.setFooter({
                     text: finalDialoge[0]+"\n"+finalLoading,
                     iconURL: iconURL
@@ -246,7 +329,7 @@ module.exports = {
                 loading += randomNumb();
                 if(loading >= 100 ) loading = 98;
                 embed.setFooter({
-                    text: "|".repeat(loading / 1.75)+" "+loading+"%",
+                    text: "|".repeat(loading / 1.8)+" "+loading+"%",
                     iconURL: icon.loading
                 });
                 interaction.editReply({embeds: [embed]});
@@ -259,10 +342,12 @@ module.exports = {
             await addUser(fireBaseDB,userData);
             await addHolderData(fireBaseDB,holderData);
             await addVerificationLink(fireBaseDB,verifyData);
+            await wait(1000);
 
             if(verifyData.length === 1) claimBTN.components[0].setLabel('Claim Role');
-            claimBTN.components[0].setURL(baseURL+"doodleverse/"+verifyData.id);
+            claimBTN.components[0].setURL(baseURL+`${defaultData.projectKey}/`+verifyData.id);
             interaction.editReply({components: [claimBTN]});
+            shoutOut(interaction,user.id) // Create Event to add roles after after claiming it on webApp
         }
     }
 }

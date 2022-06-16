@@ -24,6 +24,12 @@ module.exports = {
             errorInteraction = 'Modal Submit';
         }
 
+        // Webhook Message Interaction
+        // if(interaction.isMessageContextMenu().webhook.id) {
+        //     action = client.webhook.get(interaction.customId);
+        //     errorInteraction = 'Webhook Message';
+        // }
+
         if (!action) return;
 
         try {

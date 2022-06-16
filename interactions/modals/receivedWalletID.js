@@ -1,7 +1,6 @@
 const { MessageActionRow, Modal, TextInputComponent, MessageEmbed } = require('discord.js');
 const { validateWalletID, processWallet } = require(appRoot+'/hedera/process');
 const wait = require('node:timers/promises').setTimeout;
-const findRole = (cache,roleId) => { return cache.find(r => r.id === roleId); };
 
 module.exports = {
     data: new Modal()
@@ -21,7 +20,7 @@ module.exports = {
     async execute(interaction) {
         // Get Wallet ID
         const walletID = interaction.fields.getTextInputValue('walletID');
-        let content = "Please wait while we process your WalletID: ";
+        let content = "Please wait while we process your Wallet ID: ";
 
         const newEmbed = new MessageEmbed()
         .setColor('RANDOM').setTitle(content)

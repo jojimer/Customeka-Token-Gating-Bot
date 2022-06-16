@@ -1,4 +1,4 @@
-const { collection, addDoc, doc, getDocs, setDoc, query, where } = require('firebase/firestore');
+const { collection, doc, getDocs, setDoc, query, where, updateDoc } = require('firebase/firestore');
 
 module.exports = {
     addUser: (db,data) => {
@@ -26,5 +26,9 @@ module.exports = {
             let result = (userData.length) ? userData : false;
             callback(result);
         });
+    },
+    updateUserAccount: (db,discord_id,data) => {
+        const docRef = doc(db,'users',discord_id);
+        updateDoc(docRef,data);
     }
 }

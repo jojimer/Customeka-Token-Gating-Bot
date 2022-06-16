@@ -22,38 +22,19 @@ global.icon = {
 	error: "https://firebasestorage.googleapis.com/v0/b/discordbot-db-40708.appspot.com/o/x.png?alt=media&token=7a2c0bbf-3df6-49f4-9852-b2fc8ef3fb09"
 }
 
-// Collection Holder Ref
-//const holder = collection(db, 'holder');
-
-// #Delete Doc
-// const docRef = doc(db, 'holder', 'xyvVpblG6X6wHlLrGgSS');
-// deleteDoc(docRef);
-
-// #Queries
-// const q = query(holders, where("id", "==", "<discordID>"), orderBy("username", "desc"));
-
-// // #List Collection
-// // #onSnapshot will list new data when collection change
-// // #getDocs will list data once
-// onSnapshot(q, (snapshot) => {
-// 	let userData =  [];
-// 	snapshot.docs.forEach((doc) => {
-// 		userData.push({ ...doc.data(), id: doc.id });
-// 	});
-// 	console.log(userData);
-// })
-
 // Create a new client instance
 const client = new Client({
 	intents: [
 		Intents.FLAGS.GUILDS,
 		Intents.FLAGS.GUILD_MESSAGES,
-	] });
+	],
+});
 
 // Load Commands
 client.commands = loadCommands(new Collection());
 client.buttons = loadButtons(new Collection());
 client.modals = loadModals(new Collection());
+
 
 // Client Event
 loadEvents(client);
