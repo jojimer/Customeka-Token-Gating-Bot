@@ -1,0 +1,26 @@
+node_modules
+.env
+config.json
+firebase.js
+graveyard
+discordbot*
+
+#  https://discordapp.com/oauth2/authorize?&client_id=973996332282970122&scope=bot&permissions=268435456
+
+
+
+# I recently shifted ownership of one of my projects to another account. All you have to do is:
+
+#     1. Go to your Firebase console, and select the project you want to shift.
+#     2. Select the cog icon besides the project name on top right.
+#     3. Select Permissions from the flyout.
+#     4. Select Advanced permission settings hyperlink.
+#     5. You've reached the IAM & Admin page of Firebase.
+#     6. Click on +Add button on top.
+#     7. Enter the email ID of the account that you want to transfer the project to.
+#     8. In the dropdown, Select a role > Project > Owner. Click add
+#     9. You will receive a confirmation email. Click the link in the email to accept the invitation.
+#     10. Accept the invitation, and go to IAM & Admin page of the transferred project.
+#     11. Use remove button to delete the previous user
+
+# Hope this helps.
