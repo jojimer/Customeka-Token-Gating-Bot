@@ -55,7 +55,7 @@ module.exports = {
             ]]},
 
             //VIPer Role
-            VIPer: { roleName: "VIPer", role_id: "987224034745929728",
+            VIPer: { roleName: "VIPer", role_id: "992507356799832124",
             nfts: [
             // Case 1 1X ANY OF THE FIRST TWO                                                  
             {condition: 1, token_id: "0.0.794863"}, // CYBER Serpent
@@ -83,6 +83,7 @@ module.exports = {
         },
         memberCalled: "Serpents",
         projectKey: "serpentproject",
-        guild_id: "980041480636878848"
+        guild_id: "980041480636878848",
+        anouncement_id: "980041480636878851"
     },
 }

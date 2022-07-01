@@ -1,4 +1,7 @@
 const { data } = require('../interactions/buttons/connectWalletId');
+const { updateUserAccount } = require(appRoot+'/db_management/control');
+const { onSnapshot, collection, query, orderBy, where } = require('firebase/firestore');
+const wait = require('node:timers/promises').setTimeout;
 const init = require('../db_management/init');
 
 module.exports = {
@@ -6,40 +9,58 @@ module.exports = {
 	once: true,
 	execute(client) {
 		console.log(`Ready! Logged in as ${client.user.tag}`);
-		// Set New Name
-		//client.user.setUsername("Serpent Bot");
-
-		// Set New Avatar Icon
-		//client.user.setAvatar("https://connect.customeka.xyz/images/serp_logo1.png");
 
 		// Stop Connecting the guild
-		init.validate(fireBaseDB).then(guilds => {
-			// Map All Registered guild
-			Object.keys(guilds).map(async id => {
-
-				// Guild Object 
-				const guild = guilds[`${id}`];
-
+		init.validate(fireBaseDB).then(result => {
 				// Channel ID
-				const connectChannel = guild.channels.connect;
+				const connectChannel = result.guild.channels.connect;
+				const announcementChannel = result.guild.channels.announcement;
 
 				// Check if guild is pause from receiving services 
-				if(!guild.pause) {
+				if(!result.pause) {
 
 					// Send Bot Initial Message if channel is new
 					client.channels.cache.get(connectChannel).messages.fetch({ limit: 1 }).then(message => {
 						if(!message.first()) {
-							client.channels.cache.get(connectChannel).send({content: guild.greetings, embeds: [data.pinned], components: [data.button]});
+							client.channels.cache.get(connectChannel).send({content: result.greetings, embeds: [data.pinned], components: [data.button]});
 						}
 					})
 
-				}
-				
-				// Check if channels is new from receiving services
-				// if(!guild.new) return;
+					const colRef = collection(fireBaseDB, directive+'members')
 
-				//console.log(client.guilds.cache.get(id).memberCount)
-			})			
+					//queries
+					const q = query(colRef, where("verified", "==", "claiming"),orderBy('verification_time'))
+
+					// realtime collection data
+					onSnapshot(q, (snapshot) => {
+						let users = []
+						snapshot.docs.forEach(doc => {
+							users.push({ ...doc.data(), id: doc.id })
+						})
+
+						users.map(async u => {
+							
+							let content = `“<@${u.id}> just entered the nest.”\n `;
+							let role,roleObj;
+        
+            				const guild = client.guilds.cache.get(result.id);
+            				const member = await guild.members.fetch(u.id);
+
+							await wait(5*1000)
+
+							await u.roles.map(r => {
+								role = `<@&${r.role_id}> `;
+								content += role;
+								roleObj = guild.roles.cache.get(r.role_id);
+								member.roles.add(roleObj);
+							})
+
+							client.channels.cache.get(announcementChannel).send({content: content});
+							updateUserAccount(fireBaseDB,u.id,{verified:"claimed"});
+						})
+					})
+
+				}
 		});
 	},
 };
