@@ -44,19 +44,20 @@ module.exports = {
 							let role,roleObj;
         
             				const guild = client.guilds.cache.get(result.id);
-            				const member = await guild.members.fetch(u.id);
-
-							await wait(5*1000)
-
-							await u.roles.map(r => {
-								role = `<@&${r.role_id}> `;
-								content += role;
-								roleObj = guild.roles.cache.get(r.role_id);
-								member.roles.add(roleObj);
-							})
-
-							client.channels.cache.get(announcementChannel).send({content: content});
-							updateUserAccount(fireBaseDB,u.id,{verified:"claimed"});
+							guild.members.search({query: u.username, limit: 15, cache: false}).then(r => {
+								r.map(async gm => {
+									if(gm.user.id === u.id)
+									await u.roles.map(r => {
+										role = `<@&${r.role_id}> `;
+										content += role;
+										roleObj = guild.roles.cache.get(r.role_id);
+										gm.roles.add(roleObj);
+									})
+		
+									client.channels.cache.get(announcementChannel).send({content: content});
+									updateUserAccount(fireBaseDB,u.id,{verified:"claimed"});
+								})
+							})																				
 						})
 					})
 

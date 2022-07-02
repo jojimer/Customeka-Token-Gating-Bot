@@ -1,10 +1,10 @@
 const { searchAccount, searchNFTs } = require('./search');
-const { addUser, addHolderData, addVerificationLink, isAccountExist, updateUserAccount } = require(appRoot+'/db_management/control');
+const { addUser, addHolderData, addVerificationLink, isAccountExist } = require(appRoot+'/db_management/control');
 const { Timestamp, doc } = require('firebase/firestore');
 const { SERPENTS } = require('./nfts');
 const TokenGenerator = require('uuid-token-generator');
 const wait = require('node:timers/promises').setTimeout;
-const baseURL = "https://connect.customeka.xyz/";
+const baseURL = "https://connect.customeka.xyz/p/";
 
 // Get Default Data(Dialoges, Type, Keys)
 const default_OBJ =  {
@@ -253,11 +253,6 @@ module.exports = {
                     if(!bool && condition[1].fiveSerpent >= 5 ) bool = true;
                     if(bool) default_OBJ.rolesReceived.push("VIPer");
                 }
-
-                // TODO: Add X or Check if supreme badges unlock
-                // embed.addField(content+sp,bool.toString(),false);
-                // interaction.editReply({embeds: [embed]});
-                // dialoges[i].total = false;
             }
 
             // Total Roles Dialog
@@ -306,7 +301,7 @@ module.exports = {
             await wait(1000 * 1)
         }
         
-        if(verifyData.roles.length !== 0) { // I add @everyone as roles
+        if(verifyData.roles.length !== 0) {
             await addUser(fireBaseDB,userData);
             await addHolderData(fireBaseDB,holderData);
             await addVerificationLink(fireBaseDB,verifyData);
@@ -315,7 +310,6 @@ module.exports = {
             if(verifyData.length === 1) claimBTN.components[0].setLabel('Claim Role');
             claimBTN.components[0].setURL(baseURL+`${default_OBJ.projectKey}/`+verifyData.id);
             interaction.editReply({components: [claimBTN]});
-            //shoutOut(interaction,user.id) // Create Event to add roles after after claiming it on webApp
         }
     }
 }
