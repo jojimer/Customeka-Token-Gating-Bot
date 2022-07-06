@@ -1,6 +1,6 @@
 # Customeka-Token-Gating-Bot
 
-###This Bot is exclusively for Hedera NFT projects
+##This Bot is exclusively for Hedera NFT projects
 
 The Bot functions are:
 - Verify the members ownership of Hashgraph wallet ID
