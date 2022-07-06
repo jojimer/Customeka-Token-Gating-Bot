@@ -67,10 +67,9 @@ module.exports = {
             if(file !== 'nfts.js'){
                 const project_file = require(`./${projectPath}/${file}`);
                 const file_name = file.replace('.js','');
-                const collection_name = project_name+'_'+file_name;
                 // Set a new item in the Collection
                 // With the key as the project asset customId and the value as the exported module
-                collection.set(collection_name, project_file);
+                collection.set(file_name, project_file);
             }
         }
 

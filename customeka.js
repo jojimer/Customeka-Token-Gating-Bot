@@ -46,9 +46,10 @@ Object.keys(projects).map(p => {
 				client.nft.set('directory',directory);
 				client.nft.set('channels',initData.channels);
 				client.nft.set('projectIsPause',initData.pause);
+				//console.log(client.nft)
 	
 				// Load Interactions
-				client.commands = loadCommands(new Collection());
+				// client.commands = loadCommands(new Collection());
 				client.buttons = loadButtons(new Collection());
 				client.modals = loadModals(new Collection());
 	
