@@ -1,10 +1,10 @@
 const { searchAccount, searchNFTs, searchBadges } = require('./search');
 const { addUser, addHolderData, addVerificationLink, isAccountExist, updateUserAccount } = require(appRoot+'/db_management/control');
-const { Timestamp, doc, onSnapshot, collection, query, orderBy, where } = require('firebase/firestore');
+const { Timestamp, doc } = require('firebase/firestore');
 const { doodleNFTs } = require('./nfts');
 const TokenGenerator = require('uuid-token-generator');
 const wait = require('node:timers/promises').setTimeout;
-const baseURL = "https://connect.customeka.xyz/";
+const baseURL = "https://connect.customeka.xyz/p/";
 
 // Get Default Data(Dialoges, Type, Keys)
 const defaultD = (data) => {
@@ -39,56 +39,6 @@ const roleIdentifyer = async (token_id,defaultData) => {
 
     if(choices.length && defaultData.rolesReceived.indexOf(...choices) === -1)
     defaultData.rolesReceived.push(...choices);        
-}
-
-// Add Roles and Mention user
-const shoutOut = (interaction,discord_id) => {
-    // Send Announcement when someone claim roles
-		// collection ref
-		const colRef = collection(fireBaseDB, 'users')
-
-		// queries
-		const q = query(colRef, where("verified", "==", "claiming"),orderBy('verification_time'))
-
-        const findRole = (cache,roleId) => { return cache.find(r => r.id === roleId); };
-
-		// realtime collection data
-		const unsubscribe = onSnapshot(q, (snapshot) => {
-            let users = []
-            snapshot.docs.forEach(doc => {
-                users.push({ ...doc.data(), id: doc.id })
-            })
-
-            users.map(u => {
-                const channel_id = u.discord_server.channel_id;
-                let content = `<@${u.id}> Just Entered the server.\n `;
-                let role;
-
-                u.roles.map(r => {
-                    role = `<@&${r.role_id}> `;
-                    content += role;
-                    interaction.member.roles.add(
-                        findRole(interaction.guild.roles.cache,r.role_id)
-                    )                      
-                })
-                interaction.client.channels.cache.get(channel_id).send({content: content});
-                updateUserAccount(fireBaseDB,discord_id,{verified:"claimed"});
-                unsubscribe();
-            })
-        })
-
-        // Add / Remove Members
-        // const user = '5454654687868768'
-        // const role = '451079228381724672'
-        // client.on('guildMemberAdd', async member => {
-        //     const memberID = '5454654687868768';   // you want to add/remove roles. Only members have roles not users. So, that's why I named the variable memberID for keeping it clear.
-        //     const roleID = '451079228381724672';
-        
-        //     const guild = client.guilds.cache.get('guild-ID');   // copy the id of the server your bot is in and paste it in place of guild-ID.
-        //     const role = guild.roles.cache.get(roleID);  // here we are getting the role object using the id of that role.
-        //     const member = await guild.members.fetch(memberID); // here we are getting the member object using the id of that member. This is the member we will add the role to.
-        //     member.roles.add(role);   // here we just added the role to the member we got.
-        // }
 }
 
 module.exports = {
@@ -203,7 +153,7 @@ module.exports = {
             discord_id: user.id,
             wallet_id: walletID,
             projectName: defaultData.projectKey,
-            roles: [{name: "everyone",role_id: defaultData.everyone}],
+            roles: [],
             complete: false,
             redirect: defaultData.channel.announcement
         }
@@ -347,7 +297,6 @@ module.exports = {
             if(verifyData.length === 1) claimBTN.components[0].setLabel('Claim Role');
             claimBTN.components[0].setURL(baseURL+`${defaultData.projectKey}/`+verifyData.id);
             interaction.editReply({components: [claimBTN]});
-            shoutOut(interaction,user.id) // Create Event to add roles after after claiming it on webApp
         }
     }
 }

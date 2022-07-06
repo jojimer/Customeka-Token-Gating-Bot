@@ -16,6 +16,9 @@ global.fireBaseDB = getFirestore();
 // Set Global Root
 global.appRoot = path.resolve(__dirname);
 
+// Firestore Directive
+global.directive = "NFT_PROJECTS/doodle_verse_G45m12B/";
+
 global.icon = {
 	loading: "https://firebasestorage.googleapis.com/v0/b/discordbot-db-40708.appspot.com/o/spiral_loading.gif?alt=media&token=824a63c3-a4c7-43d7-8a38-83913c590a60",
 	success: "https://firebasestorage.googleapis.com/v0/b/discordbot-db-40708.appspot.com/o/c.png?alt=media&token=924d41ba-b687-47ed-9f0f-be0036b70900",
