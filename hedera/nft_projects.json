@@ -4,11 +4,15 @@
     "980041480636878848": {   
         "name": "serpentproject",
         "directory": "serpent_project_7H97ERE",
-        "env": "SERPENT_DISCORD_TOKEN"
+        "env": "SERPENT_DISCORD_TOKEN",
+        "welcome": "just entered the nest.”\n",
+        "connect_image": "https://firebasestorage.googleapis.com/v0/b/discordbot-db-40708.appspot.com/o/connect.png?alt=media&token=48907f7b-04ec-4049-9189-d33e39071f71'"
     },
     "973478990906003466": {
         "name": "doodleverse",
         "directory": "doodle_verse_G45m12B",
-        "env": "DOODDLEVERSE_DISCORD_TOKEN"
+        "env": "DOODDLEVERSE_DISCORD_TOKEN",
+        "welcome": "welcome to DoodleVerse”\n",
+        "connect_image": "https://firebasestorage.googleapis.com/v0/b/discordbot-db-40708.appspot.com/o/numbpad_2_50.jpeg?alt=media&token=45cc2d32-cffc-4ce8-8cb5-585f9c68b005"
     }
 }

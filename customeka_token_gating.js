@@ -30,8 +30,8 @@ global.icon = {
 // Check if project is not pause and Login to Discord with your client's token
 Object.keys(projects).map(p => {
 	if(p !== "root"){
-		const directory = projects[`${p}`].directory;
-		Init(fireBaseDB,directory).then(initData => {
+		const nftData = projects[`${p}`];
+		Init(fireBaseDB,nftData.directory).then(initData => {
 			if(!initData.pause){
 				// Create a new client instance
 				const client = new Client({
@@ -40,12 +40,21 @@ Object.keys(projects).map(p => {
 						Intents.FLAGS.GUILD_MESSAGES,
 					],
 				});
+
+				const nft = {
+					'directory': nftData.directory,
+					'welcome': nftData.welcome,
+					'channels':initData.channels,
+					'projectIsPause': initData.pause,
+					'guild_id': initData.guild_id,
+					'greetings': initData.greetings,
+					'name': nftData.name,
+					'connect_image': nftData.connect_image
+				}
 				
 				// Load Project Assets
-				client.nft = loadProjectAsset(new Collection(),projects[`${p}`].name);
-				client.nft.set('directory',directory);
-				client.nft.set('channels',initData.channels);
-				client.nft.set('projectIsPause',initData.pause);
+				client.nft = loadProjectAsset(new Collection(),nftData.name);
+				client.nft.set('data',nft);
 				//console.log(client.nft)
 	
 				// Load Interactions

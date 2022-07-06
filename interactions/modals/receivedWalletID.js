@@ -18,8 +18,8 @@ module.exports = {
 
     async execute(interaction) {
         // Get Process
-        // const project = interaction.client.nft.name;
-        const projectDirectory = 'NFT_PROJECTS/'+interaction.client.nft.get('directory')+'/';
+        const project = interaction.client.nft.get('data');
+        const projectDirectory = 'NFT_PROJECTS/'+project.directory+'/';
         const { validateWalletID, processWallet } = interaction.client.nft.get('process');
 
         // Get Wallet ID

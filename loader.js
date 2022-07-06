@@ -73,8 +73,6 @@ module.exports = {
             }
         }
 
-        collection.set('name', project_name);
-
         return collection;
     },
     loadEvents: (client) => {

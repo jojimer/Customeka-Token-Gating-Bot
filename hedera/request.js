@@ -1,7 +1,6 @@
 const mainnet = "https://mainnet-public.mirrornode.hedera.com";
 const testnet = "https://testnet.mirrornode.hedera.com";
 const axios = require("axios");
-const { connectFirestoreEmulator } = require('firebase/firestore');
 
 // Query
 const limit = 100;

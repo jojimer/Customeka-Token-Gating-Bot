@@ -10,10 +10,15 @@ module.exports = {
             const announcementChannel = r.guild.channels.announcement;
             const pause = r.pause;
 
-            return { pause: pause, channels: {
-                connect: connectChannel,
-                announcement: announcementChannel
-            } }
+            return { 
+                pause: pause, 
+                channels: {
+                    connect: connectChannel,
+                    announcement: announcementChannel
+                },
+                greetings: r.greetings,
+                guild_id: r.id
+            }
         }
     },
     GetAllUsers: async (db) => {
