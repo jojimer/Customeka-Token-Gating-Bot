@@ -1,12 +1,22 @@
 const { collection, doc, getDoc } = require('firebase/firestore');
 
 module.exports = {
-    validate: async (db) => {     
-        const settings = doc(db, 'NFT_PROJECTS', 'serpent_project_7H97ERE'); // Reference
+    Init: async (db,directory) => {
+        const settings = doc(db, 'NFT_PROJECTS', directory); // Reference
         const result = await getDoc(settings); // Get Single Document
-        if(result.exists()) return result.data();
+        if(result.exists()){
+            const r = result.data();
+            const connectChannel = r.guild.channels.connect;
+            const announcementChannel = r.guild.channels.announcement;
+            const pause = r.pause;
+
+            return { pause: pause, channels: {
+                connect: connectChannel,
+                announcement: announcementChannel
+            } }
+        }
     },
-    getAllUsers: async (db) => {
+    GetAllUsers: async (db) => {
         let usersDB = collection(db, 'users');
-    }
+    },
 }

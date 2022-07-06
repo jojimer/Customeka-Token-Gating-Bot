@@ -1,0 +1,14 @@
+
+{  
+    "root": "NFT_PROJECTS/",
+    "980041480636878848": {   
+        "name": "serpentproject",
+        "directory": "serpent_project_7H97ERE",
+        "env": "SERPENT_DISCORD_TOKEN"
+    },
+    "973478990906003466": {
+        "name": "doodleverse",
+        "directory": "doodle_verse_G45m12B",
+        "env": "DOODDLEVERSE_DISCORD_TOKEN"
+    }
+}

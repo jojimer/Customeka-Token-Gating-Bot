@@ -1,4 +1,4 @@
-const { searchAccount, searchNFTs } = require('./search');
+const { searchAccount, searchNFTs } = require('../../search');
 const { addUser, addHolderData, addVerificationLink, isAccountExist } = require(appRoot+'/db_management/control');
 const { Timestamp, doc } = require('firebase/firestore');
 const { SERPENTS } = require('./nfts');
@@ -70,7 +70,7 @@ const roleIdentifyer = async (token_id,totalPer_token) => {
 }
 
 module.exports = {
-    validateWalletID: (account_id, interaction, embed, callback) => {
+    validateWalletID: (account_id, interaction, embed, directory, callback) => {
         const dialoge = default_OBJ.validateDialoge;
         const currentUser = interaction.user.id;
         const claimBTN = interaction.client.buttons.find(btn => btn.data.claimBTN).data.claimBTN;
@@ -98,7 +98,7 @@ module.exports = {
                 callback(false);
             }else{
                 // Check if user already on the database with valid wallet ID
-                isAccountExist(fireBaseDB,account_id,(async info => {
+                isAccountExist(fireBaseDB,account_id,directory,(async info => {
                     // User no user set to false
                     const user = (info) ? info[0] : false;
 
@@ -145,7 +145,7 @@ module.exports = {
             }
         }));
     },
-    processWallet: async (walletID,interaction,embed) => {
+    processWallet: async (walletID,interaction,embed,directory) => {
         const dialoges = default_OBJ.dialoges;
         const noNFTs = default_OBJ.noNFTs;
         const rolesReceived = default_OBJ.rolesReceived;
@@ -302,9 +302,9 @@ module.exports = {
         }
         
         if(verifyData.roles.length !== 0) {
-            await addUser(fireBaseDB,userData);
-            await addHolderData(fireBaseDB,holderData);
-            await addVerificationLink(fireBaseDB,verifyData);
+            await addUser(fireBaseDB,userData,directory);
+            await addHolderData(fireBaseDB,holderData,directory);
+            await addVerificationLink(fireBaseDB,verifyData,directory);
             await wait(1000);
 
             if(verifyData.length === 1) claimBTN.components[0].setLabel('Claim Role');

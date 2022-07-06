@@ -1,5 +1,4 @@
 const { MessageActionRow, Modal, TextInputComponent, MessageEmbed } = require('discord.js');
-const { validateWalletID, processWallet } = require(appRoot+'/hedera/process');
 const wait = require('node:timers/promises').setTimeout;
 
 module.exports = {
@@ -18,6 +17,11 @@ module.exports = {
     ),
 
     async execute(interaction) {
+        // Get Process
+        // const project = interaction.client.nft.name;
+        const projectDirectory = 'NFT_PROJECTS/'+interaction.client.nft.get('directory')+'/';
+        const { validateWalletID, processWallet } = interaction.client.nft.get('process');
+
         // Get Wallet ID
         const walletID = interaction.fields.getTextInputValue('walletID');
         let content = "Please wait while we process your Wallet ID: ";
@@ -33,13 +37,13 @@ module.exports = {
         });
 
         // Check if WalletID is valid
-        await validateWalletID(walletID,interaction,newEmbed,(async result => {
+        await validateWalletID(walletID,interaction,newEmbed,projectDirectory,(async result => {
             if(result) {
 
                 // 0.0577399 wallet ID with empty doodle
                 await wait(500);
                 // Search NFTs and Badges
-                await processWallet(walletID,interaction,newEmbed);
+                await processWallet(walletID,interaction,newEmbed,projectDirectory);
             }
         }));
     }

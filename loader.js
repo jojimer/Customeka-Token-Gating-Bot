@@ -5,7 +5,7 @@ const path = require('node:path');
 const comm = 'interactions/commands';
 const butt = 'interactions/buttons';
 const mod = 'interactions/modals';
-const wbhook = 'interactions/webhook';
+const projects = 'hedera/projects';
 
 // Search Command Files
 const commandPath = path.join(comm);
@@ -18,10 +18,6 @@ const buttonFiles = fs.readdirSync(buttonPath).filter(file => file.endsWith('.js
 // Search Modal Files
 const modalPath = path.join(mod);
 const modalFiles = fs.readdirSync(modalPath).filter(file => file.endsWith('.js'));
-
-// Search Webhook
-// const webHookPath = path.join(wbhook);
-// const webHookFiles = fs.readdirSync(webHookPath).filter(file => file.endsWith('.js'));
 
 // Search Event Files
 const eventsPath = path.join('events');
@@ -62,17 +58,26 @@ module.exports = {
 
         return collection;
     },
-    // loadWebhook: (collection) => {
+    loadProjectAsset: (collection,project_name) => {
+        // Search Project Asset
+        const projectPath = path.join(projects,project_name);
+        const projectFiles = fs.readdirSync(projectPath).filter(file => file.endsWith('.js'));
+        
+        for (const file of projectFiles) {
+            if(file !== 'nfts.js'){
+                const project_file = require(`./${projectPath}/${file}`);
+                const file_name = file.replace('.js','');
+                const collection_name = project_name+'_'+file_name;
+                // Set a new item in the Collection
+                // With the key as the project asset customId and the value as the exported module
+                collection.set(collection_name, project_file);
+            }
+        }
 
-    //     for (const file of webHookFiles) {
-    //         const webhook = require(`./${wbhook}/${file}`);
-    //         // Set a new item in the Collection
-    //         // With the key as the webhook customId and the value as the exported module
-    //         collection.set(webhook.name, webhook);
-    //     }
+        collection.set('name', project_name);
 
-    //     return collection;
-    // },
+        return collection;
+    },
     loadEvents: (client) => {
 
         for (const file of eventFiles) {
