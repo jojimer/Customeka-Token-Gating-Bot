@@ -10,7 +10,6 @@ const { Init } = require('./db_management/init');
 
 // Firestore Directive
 const projects = require('./hedera/nft_projects.json');
-const { isUint8ClampedArray } = require('node:util/types');
 
 // Firebase Config
 initializeApp(firebaseConfig);
@@ -31,7 +30,7 @@ global.icon = {
 Object.keys(projects).map(p => {
 	if(p !== "root"){
 		const nftData = projects[`${p}`];
-		Init(fireBaseDB,nftData.directory).then(initData => {
+		Init(nftData.directory).then(initData => {
 			if(!initData.pause){
 				// Create a new client instance
 				const client = new Client({
@@ -43,13 +42,13 @@ Object.keys(projects).map(p => {
 
 				const nft = {
 					'directory': nftData.directory,
-					'welcome': nftData.welcome,
+					'welcome': initData.announcement_message,
 					'channels':initData.channels,
 					'projectIsPause': initData.pause,
 					'guild_id': initData.guild_id,
 					'greetings': initData.greetings,
 					'name': nftData.name,
-					'connect_image': nftData.connect_image
+					'connect_image': initData.connect_image
 				}
 				
 				// Load Project Assets
@@ -67,7 +66,7 @@ Object.keys(projects).map(p => {
 				loadEvents(client);
 	
 				// Login with Toke ID
-				client.login(process.env[projects[`${p}`].env]);
+				client.login(process.env[nftData.env]);
 			}
 		})
 	}

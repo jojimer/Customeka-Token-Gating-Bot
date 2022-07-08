@@ -1,8 +1,8 @@
 const { collection, doc, getDoc } = require('firebase/firestore');
 
 module.exports = {
-    Init: async (db,directory) => {
-        const settings = doc(db, 'NFT_PROJECTS', directory); // Reference
+    Init: async (directory) => {
+        const settings = doc(fireBaseDB, 'NFT_PROJECTS', directory); // Reference
         const result = await getDoc(settings); // Get Single Document
         if(result.exists()){
             const r = result.data();
@@ -17,11 +17,10 @@ module.exports = {
                     announcement: announcementChannel
                 },
                 greetings: r.greetings,
-                guild_id: r.id
+                guild_id: r.id,
+                connect_image: r.connect_image,
+                announcement_message: r.announcement_message
             }
         }
-    },
-    GetAllUsers: async (db) => {
-        let usersDB = collection(db, 'users');
     },
 }
