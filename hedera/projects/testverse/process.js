@@ -3,8 +3,10 @@ const { addUser, addHolderData, addVerificationLink, isAccountExist, } = require
 const { Timestamp, doc } = require('firebase/firestore');
 const { doodleNFTs } = require('./nfts');
 const TokenGenerator = require('uuid-token-generator');
+const { Console } = require('node:console');
 const wait = require('node:timers/promises').setTimeout;
 const baseURL = "https://connect.customeka.xyz/p/";
+const discord = "https://discord.com/channels";
 
 // Get Default Data(Dialoges, Type, Keys)
 const defaultD = (data) => {
@@ -157,6 +159,9 @@ module.exports = {
         const randomNumb = defaultData.randomNumb;
         const keyExpiration = (Date.now() + 60000*16);
         const claimBTN = interaction.client.buttons.find(btn => btn.data.claimBTN).data.claimBTN;
+        const nftData =  interaction.client.nft.get('data');
+        const redirectChannel = discord+'/'+nftData.guild_id+'/'+nftData.channels.announcement;
+        //console.log(redirectChannel);
 
         // Collect User Data
         const user = interaction.user;
@@ -183,7 +188,7 @@ module.exports = {
             projectName: defaultData.projectKey,
             roles: [],
             complete: false,
-            redirect: defaultData.channel.announcement
+            redirect: redirectChannel
         }
 
         const holderData = {
