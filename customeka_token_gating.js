@@ -9,7 +9,7 @@ const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
 const { Init } = require('./db_management/init');
 
 // Firestore Directive
-const projects = require('./hedera/test_projects.json');
+const projects = require('./hedera/nft_projects.json');
 
 // Firebase Config
 initializeApp(firebaseConfig);
