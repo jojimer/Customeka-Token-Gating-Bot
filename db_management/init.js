@@ -1,4 +1,4 @@
-const { collection, doc, getDoc } = require('firebase/firestore');
+const { doc, getDoc } = require('firebase/firestore');
 
 module.exports = {
     Init: async (directory) => {
@@ -6,15 +6,10 @@ module.exports = {
         const result = await getDoc(settings); // Get Single Document
         if(result.exists()){
             const r = result.data();
-            const connectChannel = r.guild.channels.connect;
-            const announcementChannel = r.guild.channels.announcement;
 
             return { 
                 pause: r.pause, 
-                channels: {
-                    connect: connectChannel,
-                    announcement: announcementChannel
-                },
+                channels: r.guild.channels,
                 greetings: r.greetings,
                 guild_id: r.id,
                 connect_image: r.connect_image,
