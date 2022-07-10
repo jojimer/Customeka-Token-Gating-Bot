@@ -24,7 +24,7 @@ module.exports = {
 
             users.map(async u => {
                 
-                let content = `“<@${u.id}> ${nftData.welcome}”\n`;
+                let content = `“<@${u.id}> (`;
                 let role,roleObj;
 
                 const guild = client.guilds.cache.get(nftData.guild_id);
@@ -38,7 +38,9 @@ module.exports = {
                                 content += role;
                                 roleObj = guild.roles.cache.get(r.role_id);
                                 gm.roles.add(roleObj);
-                            })                                                        
+                            })
+                            
+                            content += `) \n ${nftData.welcome}”`;
                             
                             //Update Firebase Members document
                             updateUserAccount(u.id,{verified:"claimed"},directory+'members').then(() => {

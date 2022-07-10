@@ -4,6 +4,7 @@ const { Timestamp, doc } = require('firebase/firestore');
 const { doodleNFTs } = require('./nfts');
 const TokenGenerator = require('uuid-token-generator');
 const wait = require('node:timers/promises').setTimeout;
+const reclaimRole = require(appRoot+'/interactions/buttons/reClaimRoles');
 const baseURL = "https://connect.customeka.xyz/p/";
 
 // Get Default Data(Dialoges, Type, Keys)
@@ -86,7 +87,7 @@ module.exports = {
                     // Check if current user is verified
                     }else if(user && user.verified === 'claimed'){
                         let message = reply(dialoge.alreadyVerified+"\n\n",'success');
-                        interaction.editReply({embeds: [message]});
+                        interaction.editReply({embeds: [message],components: [reclaimRole.button]});
                         callback(false);
 
                     // Check if current user still have time to verify account
@@ -98,7 +99,7 @@ module.exports = {
                         if(user.roles.length === 1){
                             claimBTN.components[0].setLabel('Claim Role');
                             roleText = "role:";
-                        }data
+                        }
 
                         // Set Embed Message
                         let message = reply('You still have '+calculateTime(user.verification_time)+' to claim your '+roleText+' \n\n'+roles+'\n\n','success')

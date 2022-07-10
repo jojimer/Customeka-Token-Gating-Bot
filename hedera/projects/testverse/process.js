@@ -33,10 +33,9 @@ const roleIdentifyer = async (token_id,defaultData) => {
     const roles = defaultData.roles;
 
     let choices = Object.keys(roles).filter(key => {
-        let tokenID = roles[`${key}`].token_id.filter(token => token_id === token);
-        if(tokenID.length !== 0) return roles[`${key}`].roleName;
+        if(roles[`${key}`].token_id.filter(token => token_id === token).length !== 0) return roles[`${key}`].roleName;
     });
-    
+
     if(choices.length && defaultData.rolesReceived.indexOf(...choices) === -1)
         defaultData.rolesReceived.push(...choices);
     
@@ -49,6 +48,8 @@ module.exports = {
         const dialoge = defaultData.validateDialoge;
         const currentUser = interaction.user.id;
         const claimBTN = interaction.client.buttons.find(btn => btn.data.claimBTN).data.claimBTN;
+        const reclaimBTN = interaction.client.buttons.find(btn => btn.data.reclaimRole).data.reclaimRole;
+        const localDirectory = appRoot+"/local_database/verified_members";
         const reply = (d,i = 'error') => {
             let finalLoading = "|".repeat(100/ 1.8)+" 100%";
             return embed.setFooter({
@@ -85,9 +86,42 @@ module.exports = {
                     
                     // Check if current user is verified
                     }else if(user && user.verified === 'claimed'){
-                        let message = reply(dialoge.alreadyVerified+"\n\n",'success');
-                        interaction.editReply({embeds: [message]});
-                        callback(false);
+                        const uLocal = require(localDirectory+'/'+currentUser);
+                        if(uLocal.roles.length > 0){
+                            let currentRoles = [];
+                            let claimedText = '';
+                            
+                            await interaction.member.roles.cache.each(async role => {
+                                if(role.name !== '@everyone'){                                    
+                                    currentRoles.push(role.name);
+                                }                    
+                            });
+
+                            const difference = uLocal.roles.filter(r => !currentRoles.includes(r.name));
+
+                            if(difference.length === uLocal.roles.length){
+                                let message = reply(dialoge.alreadyVerified+"\n\n",'success');
+                                 interaction.editReply({embeds: [message]});
+                            }else{
+                                difference.map(r => claimedText += `<@&${r.role_id}> `);
+                                reply(dialoge.alreadyVerified+", \nbut you have unclaimed roles, get it now! \n\n ",'success');
+                                let rcEmbed = embed.setTitle("Click the button to reclaim your roles!");
+                                interaction.editReply({embeds: [rcEmbed], components: [reclaimBTN]});
+
+                                const filter = i => i.user.id === currentUser;
+
+                                const collector = interaction.channel.createMessageComponentCollector({ filter, time: 10000 });
+
+                                collector.on('collect', async i => {
+                                    await interaction.editReply({ embeds: [rcEmbed.setTitle('You Successfully Reclaimed Roles.').setColor('#379c6f').setFooter({
+                                        text: ' ',
+                                        iconURL: null
+                                    }).setDescription('**Roles Reclaimed:** '+claimedText)], components: [] });
+                                });
+                            }
+                        }
+
+                        callback(false);                        
 
                     // Check if current user still have time to verify account
                     }else if(user && user.verification_time.seconds > Timestamp.now().seconds){
@@ -98,7 +132,7 @@ module.exports = {
                         if(user.roles.length === 1){
                             claimBTN.components[0].setLabel('Claim Role');
                             roleText = "role:";
-                        }data
+                        }
 
                         // Set Embed Message
                         let message = reply('You still have '+calculateTime(user.verification_time)+' to claim your '+roleText+' \n\n'+roles+'\n\n','success')
@@ -345,7 +379,7 @@ module.exports = {
                         }
                     }));
             }else{
-                let counterProcess = 0;                
+                let counterProcess = 0;      
                 rolesReceived.map(key => {
                     const role = {
                         name: defaultData.roles[`${key}`].roleName,
@@ -361,7 +395,7 @@ module.exports = {
                         callback(userData);      
                     }
                 });                
-            } if(i === dialoges.length-1) await wait(950 * 1);
+            } if(i === dialoges.length-1) await wait(750 * 4);
         }
     }
 }

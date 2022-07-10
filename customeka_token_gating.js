@@ -9,7 +9,7 @@ const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG);
 const { Init } = require('./db_management/init');
 
 // Firestore Directive
-const projects = require('./hedera/nft_projects.json');
+const projects = require('./hedera/test_projects.json');
 
 // Firebase Config
 initializeApp(firebaseConfig);
@@ -47,7 +47,7 @@ Object.keys(projects).map(p => {
 					'channels':initData.channels,
 					'projectIsPause': initData.pause,
 					'guild_id': initData.guild_id,
-					'greetings': initData.greetings,
+					'greetings': initData.greetings.replace("<nn>", "\n\n"),
 					'name': nftData.name,
 					'connect_image': initData.connect_image
 				}
