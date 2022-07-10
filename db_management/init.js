@@ -6,10 +6,15 @@ module.exports = {
         const result = await getDoc(settings); // Get Single Document
         if(result.exists()){
             const r = result.data();
+            const connectChannel = r.guild.channels.connect;
+            const announcementChannel = r.guild.channels.announcement;
 
             return { 
                 pause: r.pause, 
-                channels: r.guild.channels,
+                channels: {
+                    connect: connectChannel,
+                    announcement: announcementChannel
+                },
                 greetings: r.greetings,
                 guild_id: r.id,
                 connect_image: r.connect_image,
