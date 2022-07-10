@@ -130,19 +130,11 @@ module.exports = {
                     // New Record Found
                     if(nftChanged || badgesChanged){                  
                         // Update NFT record in Firestore Database
-                        if(nftChanged){
-                            updateUserAccount(u.id,{nfts: r.holding.nfts},projectDirectory+'holders');
-                            u.holding.nfts = r.holding.nfts;
-                        }
-                        
-                        // Update badges record in Firestore Database
-                        if(badgesChanged){
-                            updateUserAccount(u.id,{badges: r.holding.badges},projectDirectory+'holders');
-                            u.holding.badges = r.holding.badges;
-                        }
+                        updateUserAccount(u.id,{nfts: r.holding.nfts, badges: r.holding.badges},projectDirectory+'holders');
+                        u.holding = r.holding;
                         
                         // Check New Roles if change happen and add new role to discord
-                        checkForNewRoles(u,r,client,nftData).then(newRoles => { 
+                        checkForNewRoles(u,r,client,nftData).then(newRoles => {
                             if(typeof newRoles === 'object'){
                                 u.roles = newRoles;
                                 // Update Roles in Firestore Database

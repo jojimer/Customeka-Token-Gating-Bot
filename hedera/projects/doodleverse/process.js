@@ -357,11 +357,11 @@ module.exports = {
                     counterProcess++
                     if(counterProcess == rolesReceived.length){
                         userData.holding = holderData;
-                        console.log(userData);
+                        //console.log(userData);
                         callback(userData);      
                     }
                 });                
-            } if(i === 9) await wait(250 * 4);
+            } if(i === dialoges.length-1) await wait(950 * 1);
         }
     }
 }

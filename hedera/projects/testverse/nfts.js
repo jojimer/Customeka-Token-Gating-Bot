@@ -52,6 +52,14 @@ module.exports = {
     }
 }
 
+// "973478990906003466": {
+//     "name": "doodleverse",
+//     "directory": "doodle_verse_G45m12B",
+//     "env": "DOODDLEVERSE_DISCORD_TOKEN",
+//     "welcome": "welcome to DoodleVerse”\n",
+//     "connect_image": "https://firebasestorage.googleapis.com/v0/b/discordbot-db-40708.appspot.com/o/numbpad_2_50.jpeg?alt=media&token=45cc2d32-cffc-4ce8-8cb5-585f9c68b005"
+// }
+
 // “UserName just entered the nest.”
 
 // “It looks like you do not hold a Serpent NFT! 
