@@ -112,7 +112,7 @@ module.exports = {
         const nftData =  client.nft.get('data');
         const projectDirectory = 'NFT_PROJECTS/'+nftData.directory+'/';
 
-        cron.schedule('*/6 * * * *', () => {
+        cron.schedule(' */10 * * * *', () => {
             console.log('running a task every 5 minutes');
             memberFiles.map(async file => {
                 const u = require(`${membersPath}/${file}`);

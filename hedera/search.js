@@ -12,7 +12,7 @@ module.exports = {
             await callback(false);
         })
     },
-    searchNFTs: (account_id, token_id, callback) => {
+    searchNFTs: async (account_id, token_id, callback) => {
         const userNFTs = checkAccountNFTs(account_id,token_id);
         const res = {};
         let next,totalDoodles = 0;

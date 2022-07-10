@@ -333,6 +333,20 @@ module.exports = {
         const badges = defaultData.badges;
         const rolesReceived = defaultData.rolesReceived;
         const walletID = user.wallet;
+        const getRoles = async (roles,userData) => {
+            await roles.map(key => {
+                const role = {
+                    name: defaultData.roles[`${key}`].roleName,
+                    role_id: defaultData.roles[`${key}`].role_id
+                };
+                //console.log(key,role)
+    
+                userData.roles.push(role);
+                userData.holding = holderData;
+                //console.log(userData);            
+            });
+            return userData;
+        }
 
         const userData = {
             id: user.id, 
@@ -346,20 +360,18 @@ module.exports = {
             nfts: {},
             badges: {}
         };
-
-        let i;
-
-        for(i=0; i<=dialoges.length; i++){
-            if(i < 10){
-                const type = dialoges[i].type;            
-                const key = dialoges[i].key;
+        let x = 0;
+        await dialoges.map(async (v,i) => {
+                x++;
+                const type = v.type;            
+                const key = v.key;
                 const tokenIDs = (type === 'doodle' || type === 'raffleTicket') 
                         ? doodleNFTs[`${key}`]
                         : (type === 'badge') ? badges[`${key}`] : false;
 
                 if(type === 'doodle' || type === 'raffleTicket')
                     await tokenIDs.forEach(async token_id => {
-                        searchNFTs(walletID,token_id,(async data => {
+                        await searchNFTs(walletID,token_id,(async data => {
                             const numb = data.total;                        
                             // Get Role
                             if(numb !== 0) {
@@ -378,24 +390,11 @@ module.exports = {
                             holderData.badges[`${key}`] = data.badges[`${key}`];
                         }
                     }));
-            }else{
-                let counterProcess = 0;      
-                rolesReceived.map(key => {
-                    const role = {
-                        name: defaultData.roles[`${key}`].roleName,
-                        role_id: defaultData.roles[`${key}`].role_id
-                    };
-                    //console.log(key,role)
-    
-                    userData.roles.push(role);
-                    counterProcess++
-                    if(counterProcess == rolesReceived.length){
-                        userData.holding = holderData;
-                        //console.log(userData);
-                        callback(userData);      
-                    }
-                });                
-            } if(i === dialoges.length-1) await wait(750 * 4);
-        }
+        })
+
+        await wait(450 * 5);
+        // const stRoles = await getRoles(rolesReceived,userData);
+        // console.log(stRoles);
+        await callback(await getRoles(rolesReceived,userData));
     }
 }
