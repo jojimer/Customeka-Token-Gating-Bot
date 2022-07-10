@@ -1,20 +1,20 @@
 const { collection, doc, getDocs, setDoc, query, where, updateDoc } = require('firebase/firestore');
 
 module.exports = {
-    addUser: (db,data,directory) => {
-        const docRef = doc(db,directory+'members',data.id);
+    addUser: (data,directory) => {
+        const docRef = doc(fireBaseDB,directory+'members',data.id);
         setDoc(docRef,data);
     },
-    addHolderData: (db,data,directory) => {
-        const docRef = doc(db,directory+'holders',data.id);
+    addHolderData: (data,directory) => {
+        const docRef = doc(fireBaseDB,directory+'holders',data.id);
         setDoc(docRef,data);
     },
-    addVerificationLink: (db,data,directory) => {
-        const docRef = doc(db,directory+'verification_key',data.id);
+    addVerificationLink: (data,directory) => {
+        const docRef = doc(fireBaseDB,directory+'verification_key',data.id);
         setDoc(docRef,data);
     },
-    isAccountExist: (db,account_id,directory,callback) => {
-        const colRef = collection(db,directory+'members');
+    isAccountExist: (account_id,directory,callback) => {
+        const colRef = collection(fireBaseDB,directory+'members');
         const q = query(colRef, where("walletID", "==", account_id));
         getDocs(q).then(snapshot => {
             let userData =  [];
@@ -27,8 +27,8 @@ module.exports = {
             callback(result);
         });
     },
-    updateUserAccount: (db,discord_id,data,directory) => {
-        const docRef = doc(db,directory+'members',discord_id);
-        updateDoc(docRef,data);
+    updateUserAccount: (discord_id,data,directory) => {
+        const docRef = doc(fireBaseDB,directory,discord_id);
+        return updateDoc(docRef,data);
     }
 }

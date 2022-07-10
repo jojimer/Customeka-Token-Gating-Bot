@@ -47,9 +47,6 @@ module.exports = {
         projectKey: "doodleverse",
         guild_id: "973478990906003466"
     },
-    serpentNFTs: {
-        guild_id: "980041480636878848"
-    }
 }
 
 // “UserName just entered the nest.”

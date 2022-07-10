@@ -36,15 +36,16 @@ const roleIdentifyer = async (token_id,defaultData) => {
         let tokenID = roles[`${key}`].token_id.filter(token => token_id === token);
         if(tokenID.length !== 0) return roles[`${key}`].roleName;
     });
-
+    
     if(choices.length && defaultData.rolesReceived.indexOf(...choices) === -1)
-    defaultData.rolesReceived.push(...choices);        
+        defaultData.rolesReceived.push(...choices);
+    
+    return;
 }
 
 module.exports = {
     validateWalletID: (account_id, interaction, embed, directory, callback) => {
-        const data = (true) ? doodleNFTs : "";
-        const defaultData = defaultD(data);
+        const defaultData = defaultD(doodleNFTs);
         const dialoge = defaultData.validateDialoge;
         const currentUser = interaction.user.id;
         const claimBTN = interaction.client.buttons.find(btn => btn.data.claimBTN).data.claimBTN;
@@ -72,7 +73,7 @@ module.exports = {
                 callback(false);
             }else{
                 // Check if user already on the database with valid wallet ID
-                isAccountExist(fireBaseDB,account_id,directory,(async info => {
+                isAccountExist(account_id,directory,(async info => {
                     // User no user set to false
                     const user = (info) ? info[0] : false;
 
@@ -97,13 +98,7 @@ module.exports = {
                         if(user.roles.length === 1){
                             claimBTN.components[0].setLabel('Claim Role');
                             roleText = "role:";
-                        }
-
-                        // Set button URL
-                        claimBTN.components[0].setURL(baseURL+`${defaultData.projectKey}/`+user.verification_key);
-
-                        // Load roles from Array                      
-                        user.roles.map(val => roles+= val.name+"\n" );
+                        }data
 
                         // Set Embed Message
                         let message = reply('You still have '+calculateTime(user.verification_time)+' to claim your '+roleText+' \n\n'+roles+'\n\n','success')
@@ -120,8 +115,7 @@ module.exports = {
         }));
     },
     processWallet: async (walletID,interaction,embed,directory) => {
-        const data = (true) ? doodleNFTs : "";
-        const defaultData = defaultD(data);
+        const defaultData = defaultD(doodleNFTs);
         const dialoges = defaultData.dialoges;
         const badges = defaultData.badges;
         const noNFTs = defaultData.noNFTs;
@@ -172,7 +166,7 @@ module.exports = {
             const type = dialoges[i].type;
             const key = dialoges[i].key;
             const tokenIDs = (type === 'doodle' || type === 'raffleTicket') 
-                    ? data[`${key}`]
+                    ? doodleNFTs[`${key}`]
                     : (type === 'badge') ? badges[`${key}`] : false;
             let content = dialoges[i].content;
 
@@ -202,7 +196,7 @@ module.exports = {
                         }        
                     }));
 
-                    await wait(1000);        
+                    await wait(1000);
                 });
 
             if(type === 'badge')
@@ -289,14 +283,85 @@ module.exports = {
         }
 
         if(verifyData.roles.length !== 0) {
-            await addUser(fireBaseDB,userData,directory);
-            await addHolderData(fireBaseDB,holderData,directory);
-            await addVerificationLink(fireBaseDB,verifyData,directory);
+            await addUser(userData,directory);
+            await addHolderData(holderData,directory);
+            await addVerificationLink(verifyData,directory);
             await wait(1000);
 
             if(verifyData.length === 1) claimBTN.components[0].setLabel('Claim Role');
             claimBTN.components[0].setURL(baseURL+`${defaultData.projectKey}/`+verifyData.id);
             interaction.editReply({components: [claimBTN]});
+        }
+    },
+    monitorWallet: async (user,callback) => {
+        const defaultData = defaultD(doodleNFTs);
+        const dialoges = defaultData.dialoges.filter(v => v.type !== 'dialoge');
+        const badges = defaultData.badges;
+        const rolesReceived = defaultData.rolesReceived;
+        const walletID = user.wallet;
+
+        const userData = {
+            id: user.id, 
+            username: user.username,
+            roles: []
+        };
+
+        const holderData = {
+            id: user.id,
+            username: user.username,
+            nfts: {},
+            badges: {}
+        };
+
+        let i;
+
+        for(i=0; i<=dialoges.length; i++){
+            if(i < 10){
+                const type = dialoges[i].type;            
+                const key = dialoges[i].key;
+                const tokenIDs = (type === 'doodle' || type === 'raffleTicket') 
+                        ? doodleNFTs[`${key}`]
+                        : (type === 'badge') ? badges[`${key}`] : false;
+
+                if(type === 'doodle' || type === 'raffleTicket')
+                    await tokenIDs.forEach(async token_id => {
+                        searchNFTs(walletID,token_id,(async data => {
+                            const numb = data.total;                        
+                            // Get Role
+                            if(numb !== 0) {
+                                await roleIdentifyer(token_id,defaultData);
+                                holderData.nfts[`${token_id}`] = data.nft[`${token_id}`];
+                            }
+                        }));      
+                    });
+
+                if(type === 'badge')
+                    await searchBadges(walletID,tokenIDs,key,(async data => {
+                        const numb = data.total;
+                        // Increment Number of Badges in single Token ID
+                        if(numb !== 0){
+                            await roleIdentifyer(tokenIDs[0],defaultData);
+                            holderData.badges[`${key}`] = data.badges[`${key}`];
+                        }
+                    }));
+            }else{
+                let counterProcess = 0;                
+                rolesReceived.map(key => {
+                    const role = {
+                        name: defaultData.roles[`${key}`].roleName,
+                        role_id: defaultData.roles[`${key}`].role_id
+                    };
+                    //console.log(key,role)
+    
+                    userData.roles.push(role);
+                    counterProcess++
+                    if(counterProcess == rolesReceived.length){
+                        userData.holding = holderData;
+                        console.log(userData);
+                        callback(userData);      
+                    }
+                });                
+            } if(i === 9) await wait(250 * 4);
         }
     }
 }

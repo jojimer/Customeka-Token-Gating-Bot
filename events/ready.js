@@ -1,5 +1,6 @@
 const { data } = require('../interactions/buttons/connectWalletId');
-const { snapShot } = require(appRoot+'/db_management/claiming_listener');
+const { snapShotRoleClaimers } = require(appRoot+'/db_management/snapshots');
+const { startMonitoring } = require(appRoot+'/db_management/monitor');
 
 module.exports = {
 	name: 'ready',
@@ -26,7 +27,9 @@ module.exports = {
 			})					
 
 			// Add listener to members database for claiming roles after verification process completed
-			snapShot(client,announcementChannel,projectDirectory,nftData);
+			snapShotRoleClaimers(client,announcementChannel,projectDirectory,nftData);
+			// Monitor Verified Users
+			startMonitoring(client);
 		}
 	},
 };

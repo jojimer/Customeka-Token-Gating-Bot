@@ -18,6 +18,8 @@
     "dotenv": "^16.0.1",
     "firebase": "^9.8.1",
     "firebase-admin": "^10.3.0",
+    "node-cron": "^3.0.1",
+    "perf_hooks": "^0.0.1",
     "uuid-token-generator": "^1.0.0"
   },
   "devDependencies": {

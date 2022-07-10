@@ -98,7 +98,7 @@ module.exports = {
                 callback(false);
             }else{
                 // Check if user already on the database with valid wallet ID
-                isAccountExist(fireBaseDB,account_id,directory,(async info => {
+                isAccountExist(account_id,directory,(async info => {
                     // User no user set to false
                     const user = (info) ? info[0] : false;
 
@@ -302,9 +302,9 @@ module.exports = {
         }
         
         if(verifyData.roles.length !== 0) {
-            await addUser(fireBaseDB,userData,directory);
-            await addHolderData(fireBaseDB,holderData,directory);
-            await addVerificationLink(fireBaseDB,verifyData,directory);
+            await addUser(userData,directory);
+            await addHolderData(holderData,directory);
+            await addVerificationLink(verifyData,directory);
             await wait(1000);
 
             if(verifyData.length === 1) claimBTN.components[0].setLabel('Claim Role');

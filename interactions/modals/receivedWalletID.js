@@ -43,7 +43,7 @@ module.exports = {
                 // 0.0577399 wallet ID with empty doodle
                 await wait(500);
                 // Search NFTs and Badges
-                await processWallet(walletID,interaction,newEmbed,projectDirectory);
+                await processWallet(walletID,interaction,newEmbed,projectDirectory,'new');
             }
         }));
     }

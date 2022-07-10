@@ -4,6 +4,7 @@ config.json
 firebase.js
 graveyard
 discordbot*
+local_database
 
 #  https://discordapp.com/oauth2/authorize?&client_id=994983053342552166&scope=bot&permissions=268618752
 # 
