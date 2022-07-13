@@ -410,7 +410,7 @@ module.exports = {
 
         await wait(1000 * 12.5);
         const r = await getRoles(rolesReceived,userData);
-        console.log(r)
+        //console.log(r)
         await callback(r);
     }
 }
