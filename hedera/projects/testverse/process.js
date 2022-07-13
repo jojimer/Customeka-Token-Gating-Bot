@@ -251,7 +251,7 @@ module.exports = {
                     const numb = data.total;
                     // Increment Number of Badges in single Token ID
                     if(numb !== 0){
-                        roleIdentifyer(tokenIDs[0],defaultData);
+                        roleIdentifyer(tokenIDs[0],defaultData,key);
                         holderData.badges[`${key}`] = data.badges[`${key}`];
                     }
 
@@ -399,13 +399,13 @@ module.exports = {
                         const numb = data.total;
                         // Increment Number of Badges in single Token ID
                         if(numb !== 0){
-                            await roleIdentifyer(tokenIDs[0],defaultData);
+                            await roleIdentifyer(tokenIDs[0],defaultData,key);
                             holderData.badges[`${key}`] = data.badges[`${key}`];
                         }
                     }));
         })
 
-        await wait(450 * 8);
+        await wait(1000 * 12.5);
         await callback(await getRoles(rolesReceived,userData));
     }
 }
