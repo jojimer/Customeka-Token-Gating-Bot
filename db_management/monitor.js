@@ -123,12 +123,12 @@ module.exports = {
                     const recordedToken = await tokenCounter(Object.keys(u.holding.nfts),u.holding.nfts);
                     const nftChanged = await checkForChanges(holdingsToken,recordedToken);
                     const badgesChanged = (
-                        Object.keys(u.holding.badges).length > Object.keys(r.holding.badges).length
-                        || Object.keys(u.holding.badges).length < Object.keys(r.holding.badges).length
+                        (Object.keys(u.holding.badges).length > Object.keys(r.holding.badges).length || Object.keys(u.holding.badges).length < Object.keys(r.holding.badges).length) ||
+                        (u.roles.length > r.roles.length || u.roles.length < r.roles.length)
                     ) ? true : false;
 
                     // New Record Found
-                    if(nftChanged || badgesChanged){                  
+                    if(nftChanged || badgesChanged){              
                         // Update NFT record in Firestore Database
                         updateUserAccount(u.id,{nfts: r.holding.nfts, badges: r.holding.badges},projectDirectory+'holders');
                         u.holding = r.holding;

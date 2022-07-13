@@ -13,9 +13,9 @@ module.exports = {
         const docRef = doc(fireBaseDB,directory+'verification_key',data.id);
         setDoc(docRef,data);
     },
-    isAccountExist: (account_id,directory,callback) => {
+    isAccountExist: (discord_id,directory,callback) => {
         const colRef = collection(fireBaseDB,directory+'members');
-        const q = query(colRef, where("walletID", "==", account_id));
+        const q = query(colRef, where("id", "==", discord_id));
         getDocs(q).then(snapshot => {
             let userData =  [];
             snapshot.docs.forEach((doc) => {

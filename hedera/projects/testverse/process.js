@@ -20,8 +20,8 @@ const defaultD = (data) => {
         noNFTs: { bool: true, content: "Sorry you don't have any "+data.memberCalled+" in your wallet!" },
         validateDialoge: {
             invalidWalletID: "The wallet ID you entered is invalid, please try again!\n",
-            walletIdClamed: "The wallet ID you entered has been recorded under "+data.memberCalled+" Member: ",
-            alreadyVerified: "Your account and wallet ID is already verified! ",
+            walletIdClamed: "You already verified your wallet ID with the account number of: ",
+            alreadyVerified: "Your discord account and wallet ID is already verified! ",
             directToSupportTicket: "Please reach out our team if you need a technical support by making a ticket on #-Ticket Support Channel"
         },
         channel: data.channel,
@@ -83,27 +83,29 @@ module.exports = {
                 await interaction.editReply({embeds: [message]});
                 callback(false);
             }else{
+                const discord_id = interaction.user.id;
                 // Check if user already on the database with valid wallet ID
-                isAccountExist(account_id,directory,(async info => {
+                isAccountExist(discord_id,directory,(async info => {
                     // User no user set to false
                     const user = (info) ? info[0] : false;
 
-                    // Check if current user and the user with same wallet ID is same
-                    if(user && currentUser !== user.id){
-                        let message = reply(dialoge.walletIdClamed+"\n\n- @"+user.username+"\n\n");
+                    // Check if current user is trying to register different account ID from the one previously registered
+                    if(account_id !== user.walletID){
+                        let message = reply(dialoge.walletIdClamed+user.walletID+"\n\nYou can't register two wallet ID in one discord account.\n\n");
                         interaction.editReply({embeds: [message]});
                         callback(false);
-                    
-                    // Check if current user is verified
-                    }else if(user && user.verified === 'claimed'){
+                    }// Check if current user is verified
+                    else if(user && user.verified === 'claimed'){
                         const uLocal = require(localDirectory+'/'+currentUser);
                         if(uLocal.roles.length > 0){
                             let currentRoles = [];
                             let claimedText = '';
                             
                             await interaction.member.roles.cache.each(async role => {
-                                if(role.name !== '@everyone'){                                    
-                                    currentRoles.push(role.name);
+                                if(role.name !== '@everyone'){
+                                    Object.keys(defaultData.roles).map(v => {
+                                        if(v.roleName == role.name) currentRoles.push(role.name);
+                                    })
                                 }                    
                             });
 
@@ -133,8 +135,9 @@ module.exports = {
 
                         callback(false);                        
 
-                    // Check if current user still have time to verify account
-                    }else if(user && user.verification_time.seconds > Timestamp.now().seconds){
+                    
+                    }// Check if current user still have time to verify account
+                    else if(user && user.verification_time.seconds > Timestamp.now().seconds){
                         let roles = "";
                         let roleText = "roles:";
 
@@ -406,6 +409,8 @@ module.exports = {
         })
 
         await wait(1000 * 12.5);
-        await callback(await getRoles(rolesReceived,userData));
+        const r = await getRoles(rolesReceived,userData);
+        console.log(r)
+        await callback(r);
     }
 }
