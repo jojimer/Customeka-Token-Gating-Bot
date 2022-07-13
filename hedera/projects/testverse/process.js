@@ -31,12 +31,20 @@ const defaultD = (data) => {
 }
 
 // Roles Identifyer
-const roleIdentifyer = async (token_id,defaultData) => {
+const roleIdentifyer = async (token_id,defaultData, bagde_key = false) => {
     const roles = defaultData.roles;
+    let choices;
 
-    let choices = Object.keys(roles).filter(key => {
-        if(roles[`${key}`].token_id.filter(token => token_id === token).length !== 0) return roles[`${key}`].roleName;
-    });
+    if(bagde_key === false){
+        choices = Object.keys(roles).filter(key => {
+            if(roles[`${key}`].token_id.filter(token => token_id === token).length !== 0) return roles[`${key}`].roleName;
+        });
+    }else{
+        choices = Object.keys(roles).filter(key => {
+            if(roles[`${key}`].token_id.filter(token => token_id === token).length !== 0 && roles[`${key}`].key === bagde_key) return roles[`${key}`].roleName;
+        });
+        if(choices.length !== 0) choices.push("Badge Holders");
+    }
 
     if(choices.length && defaultData.rolesReceived.indexOf(...choices) === -1)
         defaultData.rolesReceived.push(...choices);
@@ -397,9 +405,7 @@ module.exports = {
                     }));
         })
 
-        await wait(450 * 5);
-        // const stRoles = await getRoles(rolesReceived,userData);
-        // console.log(stRoles);
+        await wait(450 * 8);
         await callback(await getRoles(rolesReceived,userData));
     }
 }
