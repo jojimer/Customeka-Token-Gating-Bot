@@ -37,10 +37,10 @@ const checkForNewRoles = async (u,r,client,nftData) => {
     let roles;
     if(u.roles.length < r.roles.length){
         const newRole = r.roles.filter(role => {
-            const count = u.roles.filter(r => r.name === role.name).length;
+            const count = u.roles.filter(ur => ur.name === role.name).length;
             return count === 0;
         });
-        console.log(newRole);
+        //console.log(newRole);
         u.roles.push(...newRole);
         let content = `“<@${u.id}> Alert! New Role Acquired”\n`;
         let role,roleObj;
@@ -66,7 +66,7 @@ const checkForNewRoles = async (u,r,client,nftData) => {
         })
     }else if(u.roles.length > r.roles.length){
         const removeRole = u.roles.filter(role => {
-            const count = r.roles.filter(r => r.name === role.name).length;
+            const count = r.roles.filter(ar => ar.name === role.name).length;
             return count === 0;
         });
         
