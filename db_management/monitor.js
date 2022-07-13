@@ -57,7 +57,7 @@ const checkForNewRoles = async (u,r,client,nftData) => {
                 })
             }
             
-            client.channels.cache.get(nftData.channels.announcement).send({content: content});
+            if(newRole.length !== 0) client.channels.cache.get(nftData.channels.announcement).send({content: content});
             console.log('New Roles Acquired');
             roles = u.roles;
         }).catch(err => {
@@ -88,7 +88,7 @@ const checkForNewRoles = async (u,r,client,nftData) => {
             content += (removeRole.length > 1) ? ' Roles' : 'Role';
             content += ' has been removed due to disqualification of NFT holdings';
             
-            client.channels.cache.get(nftData.channels.announcement).send({content: content});
+            if(removeRole.length !== 0) client.channels.cache.get(nftData.channels.announcement).send({content: content});
             console.log('Removed '+u.username+' Roles',removeRole);
             u.roles = u.roles.filter(role => {
                 const count = r.roles.filter(r => r.name === role.name).length;                
