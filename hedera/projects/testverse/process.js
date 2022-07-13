@@ -34,16 +34,16 @@ const defaultD = (data) => {
 const roleIdentifyer = async (token_id,defaultData, bagde_key = false) => {
     const roles = defaultData.roles;
     let choices;
-
-    if(bagde_key === false){
+    
+    if(typeof bagde_key !== "string"){
         choices = Object.keys(roles).filter(key => {
             if(roles[`${key}`].token_id.filter(token => token_id === token).length !== 0) return roles[`${key}`].roleName;
         });
-    }else{
+    }else{        
         choices = Object.keys(roles).filter(key => {
             if(roles[`${key}`].token_id.filter(token => token_id === token).length !== 0 && roles[`${key}`].key === bagde_key) return roles[`${key}`].roleName;
         });
-        if(choices.length !== 0) choices.push("Badge Holders");
+        if(choices.length !== 0) choices.push("badgeHolder");
     }
 
     if(choices.length && defaultData.rolesReceived.indexOf(...choices) === -1)
@@ -398,7 +398,7 @@ module.exports = {
                     await searchBadges(walletID,tokenIDs,key,(async data => {
                         const numb = data.total;
                         // Increment Number of Badges in single Token ID
-                        if(numb !== 0){
+                        if(numb !== 0){                            
                             await roleIdentifyer(tokenIDs[0],defaultData,key);
                             holderData.badges[`${key}`] = data.badges[`${key}`];
                         }
