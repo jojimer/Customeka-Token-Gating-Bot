@@ -35,13 +35,13 @@ const updateLocalDB = (id,newData) => {
 
 const checkForNewRoles = async (u,r,client,nftData) => {
     let roles = false;
-    console.log(u.roles, r.roles);
+    
     if(u.roles.length < r.roles.length){
         const newRole = r.roles.filter(role => {
             const count = u.roles.filter(ur => ur.name === role.name).length;
             return count === 0;
         });
-        //console.log(newRole);
+        
         if(newRole.length !== 0){
             u.roles.push(...newRole);
             let content = `“<@${u.id}> Alert! New Role Acquired”\n`;

@@ -90,7 +90,7 @@ module.exports = {
                     const user = (info) ? info[0] : false;
 
                     // Check if current user is trying to register different account ID from the one previously registered
-                    if(account_id !== user.walletID){
+                    if(user && account_id !== user.walletID){
                         let message = reply(dialoge.walletIdClamed+user.walletID+"\n\nYou can't register two wallet ID in one discord account.\n\n");
                         interaction.editReply({embeds: [message]});
                         callback(false);
