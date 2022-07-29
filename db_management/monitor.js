@@ -96,7 +96,7 @@ const checkForNewRoles = async (u,r,client,nftData) => {
                 client.channels.cache.get(nftData.channels.announcement).send({content: content});
                 console.log('Removed '+u.username+' Roles',removeRole);
                 u.roles = u.roles.filter(role => {
-                    const count = r.roles.filter(r => r.name === role.name).length;                
+                    const count = r.roles.filter(r => r.name === role.name).length;           
                     return count > 0;
                 });
                 roles = u.roles;
@@ -132,10 +132,11 @@ module.exports = {
                     ) ? true : false;
 
                     // New Record Found
-                    if(nftChanged || badgesChanged){              
+                    if(nftChanged || badgesChanged){
+                        console.log('nft-changed: '+nftChanged, 'badge-changed: '+badgesChanged)
                         // Update NFT record in Firestore Database
-                        updateUserAccount(u.id,{nfts: r.holding.nfts, badges: r.holding.badges},projectDirectory+'holders');
-                        u.holding = r.holding;
+                        // updateUserAccount(u.id,{nfts: r.holding.nfts, badges: r.holding.badges},projectDirectory+'holders');
+                        // u.holding = r.holding;
                         
                         // Check New Roles if change happen and add new role to discord
                         checkForNewRoles(u,r,client,nftData).then(newRoles => {
@@ -146,7 +147,7 @@ module.exports = {
                             }
 
                             // Update Local Data
-                            updateLocalDB(u.id,u);
+                            // updateLocalDB(u.id,u);
                         })
                     }  
                 }));
