@@ -392,6 +392,7 @@ module.exports = {
                             // Get Role
                             if(numb !== 0) {
                                 await roleIdentifyer(token_id,defaultData);
+                                await wait(1000 * 12.5);
                                 holderData.nfts[`${token_id}`] = data.nft[`${token_id}`];
                             }
                         }));      
@@ -403,6 +404,7 @@ module.exports = {
                         // Increment Number of Badges in single Token ID
                         if(numb !== 0){                            
                             await roleIdentifyer(tokenIDs[0],defaultData,key);
+                            await wait(1000 * 12.5);
                             holderData.badges[`${key}`] = data.badges[`${key}`];
                         }
                     }));
