@@ -116,7 +116,7 @@ module.exports = {
         const nftData =  client.nft.get('data');
         const projectDirectory = 'NFT_PROJECTS/'+nftData.directory+'/';
 
-        cron.schedule(' */5 * * * *', () => {
+        cron.schedule(' */2 * * * *', () => {
             console.log('running a task every 5 minutes');
             memberFiles.map(async file => {
                 const u = require(`${membersPath}/${file}`);
@@ -133,7 +133,8 @@ module.exports = {
 
                     // New Record Found
                     if(nftChanged || badgesChanged){
-                        console.log('nft-changed: '+nftChanged, 'badge-changed: '+badgesChanged)
+                        console.log('nft-changed: '+nftChanged, 'badge-changed: '+badgesChanged);
+                        console.log(u,r);
                         // Update NFT record in Firestore Database
                         // updateUserAccount(u.id,{nfts: r.holding.nfts, badges: r.holding.badges},projectDirectory+'holders');
                         // u.holding = r.holding;
