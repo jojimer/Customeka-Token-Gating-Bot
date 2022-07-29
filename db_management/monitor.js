@@ -139,16 +139,16 @@ module.exports = {
                         // u.holding = r.holding;
                         
                         // Check New Roles if change happen and add new role to discord
-                        checkForNewRoles(u,r,client,nftData).then(newRoles => {
-                            if(typeof newRoles === 'object'){
-                                u.roles = newRoles;
-                                // Update Roles in Firestore Database
-                                updateUserAccount(u.id,{roles: u.roles},projectDirectory+'members');
-                            }
+                        // checkForNewRoles(u,r,client,nftData).then(newRoles => {
+                        //     if(typeof newRoles === 'object'){
+                        //         u.roles = newRoles;
+                        //         // Update Roles in Firestore Database
+                        //         updateUserAccount(u.id,{roles: u.roles},projectDirectory+'members');
+                        //     }
 
-                            // Update Local Data
-                            // updateLocalDB(u.id,u);
-                        })
+                        //     // Update Local Data
+                        //     updateLocalDB(u.id,u);
+                        // })
                     }  
                 }));
                 const endTime = performance.now();
