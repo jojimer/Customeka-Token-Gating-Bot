@@ -46,20 +46,21 @@ module.exports = {
                             updateUserAccount(u.id,{verified:"claimed"},directory+'members').then(() => {
                                 getDoc(doc(fireBaseDB,directory+'holders',u.id)).then(r => {
                                     if(r.exists()){
-                                        const newData = loopDelete(u,["holders_data","verification_key","verification_time","verified","vip"]);
-                                        const holder = r.data();
-                                        newData.holding = holder;
-                                        // Save Verified User to databased
-                                        const jsonContent = JSON.stringify(newData);
-                                        fs.writeFile(appRoot+localDB+u.id+".json", jsonContent, 'utf8', (err) => {
-                                            if (err) {
-                                                console.log("An error occured while writing JSON Object to File.");
-                                                return console.log(err);
-                                            }
+                                        // const newData = loopDelete(u,["holders_data","verification_key","verification_time","verified","vip"]);
+                                        // const holder = r.data();
+                                        // newData.holding = holder;
+                                        // // Save Verified User to databased
+                                        // const jsonContent = JSON.stringify(newData);
+                                        // fs.writeFile(appRoot+localDB+u.id+".json", jsonContent, 'utf8', (err) => {
+                                        //     if (err) {
+                                        //         console.log("An error occured while writing JSON Object to File.");
+                                        //         return console.log(err);
+                                        //     }
                                             
-                                            console.log("verified members JSON file has been saved.");
-                                            client.channels.cache.get(announceTo).send({content: content});
-                                        });
+                                        //     console.log("verified members JSON file has been saved.");
+                                        //     client.channels.cache.get(announceTo).send({content: content});
+                                        // });
+                                        client.channels.cache.get(announceTo).send({content: content});
                                     }
                                 })                                
                             });                   
