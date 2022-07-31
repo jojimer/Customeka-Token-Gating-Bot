@@ -19,7 +19,7 @@ const checkForNewRoles = async (u,newRole,removeRole,client,guild,member,nftData
             nc_roleObj = guild.roles.cache.get(nRole.role_id);
             member.roles.add(nc_roleObj);
         })
-        //console.log(u.username+ ' New Roles Acquired', newRole);
+        console.log(u.username+ ' New Roles Acquired', newRole);
 
         content += '\n\n';
         oldRoles.push(...newRole);
@@ -43,7 +43,7 @@ const checkForNewRoles = async (u,newRole,removeRole,client,guild,member,nftData
         content += (removeRole.length > 1) ? ' Roles' : 'Role';
         content += ' has been removed due to disqualification of NFT holdings';
         
-        //console.log('Removed '+u.username+' Roles',removeRole);
+        console.log('Removed '+u.username+' Roles',removeRole);
 
         oldRoles.filter(role => {
             const count = removeRole.filter(r => r.role_id === role.role_id).length;           
