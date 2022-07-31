@@ -409,7 +409,7 @@ module.exports = {
                     }));
         })
 
-        await wait(1000 * 60);
+        await wait(1000 * 40);
         const r = await getRoles(rolesReceived,userData);
         //console.log(r)
         await callback(r);

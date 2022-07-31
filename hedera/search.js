@@ -75,6 +75,8 @@ module.exports = {
                 total: totalDoodles,
                 nft: res,
             });     
+        }).catch(err => {
+            console.log(err);
         })
     },
     searchBadges: async (account_id, badge, key, callback) => {
