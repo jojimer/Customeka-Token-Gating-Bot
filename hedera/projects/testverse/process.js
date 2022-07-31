@@ -59,7 +59,6 @@ module.exports = {
         const currentUser = interaction.user.id;
         const claimBTN = interaction.client.buttons.find(btn => btn.data.claimBTN).data.claimBTN;
         const reclaimBTN = interaction.client.buttons.find(btn => btn.data.reclaimRole).data.reclaimRole;
-        const localDirectory = appRoot+"/local_database/verified_members";
         const reply = (d,i = 'error') => {
             let finalLoading = "|".repeat(100/ 1.8)+" 100%";
             return embed.setFooter({
@@ -96,22 +95,24 @@ module.exports = {
                         callback(false);
                     }// Check if current user is verified
                     else if(user && user.verified === 'claimed'){
-                        const uLocal = require(localDirectory+'/'+currentUser);
-                        if(uLocal.roles.length > 0){
+                        
+                        if(user.roles.length > 0){
                             let currentRoles = [];
                             let claimedText = '';
-                            
+                            const valid_roles = [];        
+                            Object.keys(defaultData.roles).map(v => {
+                                valid_roles.push(doodleNFTs.Roles[v]);
+                            });
+
                             await interaction.member.roles.cache.each(async role => {
-                                if(role.name !== '@everyone'){
-                                    Object.keys(defaultData.roles).map(v => {
-                                        if(v.roleName == role.name) currentRoles.push(role.name);
-                                    })
+                                if(role.role_id !== valid_roles.filter(r => r.role_id === role.id)){
+                                    currentRoles.push(role.name);
                                 }                    
                             });
 
-                            const difference = uLocal.roles.filter(r => !currentRoles.includes(r.name));
+                            const difference = user.roles.filter(r => !currentRoles.includes(r.name));
 
-                            if(difference.length === uLocal.roles.length){
+                            if(difference.length === user.roles.length){
                                 let message = reply(dialoge.alreadyVerified+"\n\n",'success');
                                  interaction.editReply({embeds: [message]});
                             }else{
@@ -392,7 +393,6 @@ module.exports = {
                             // Get Role
                             if(numb !== 0) {
                                 await roleIdentifyer(token_id,defaultData);
-                                await wait(1000 * 12.5);
                                 holderData.nfts[`${token_id}`] = data.nft[`${token_id}`];
                             }
                         }));      
@@ -404,15 +404,21 @@ module.exports = {
                         // Increment Number of Badges in single Token ID
                         if(numb !== 0){                            
                             await roleIdentifyer(tokenIDs[0],defaultData,key);
-                            await wait(1000 * 12.5);
                             holderData.badges[`${key}`] = data.badges[`${key}`];
                         }
                     }));
         })
 
-        await wait((1000 * 12.5) * 2);
+        await wait(1000 * 60);
         const r = await getRoles(rolesReceived,userData);
         //console.log(r)
         await callback(r);
+    },
+    getRoles: async (callback) => {
+        const roles = [];        
+        Object.keys(doodleNFTs.Roles).map(v => {
+            roles.push(doodleNFTs.Roles[v]);
+        });
+        callback(roles);
     }
 }
