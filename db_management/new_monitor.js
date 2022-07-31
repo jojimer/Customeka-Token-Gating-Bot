@@ -57,7 +57,7 @@ const checkForNewRoles = async (u,newRole,removeRole,client,guild,member,nftData
     }
 
     await wait(1000 * 35)
-    await client.channels.cache.get(nftData.channels.announcement).send({content: content});
+    // await client.channels.cache.get(nftData.channels.announcement).send({content: content});
     return roles;
 }
 
