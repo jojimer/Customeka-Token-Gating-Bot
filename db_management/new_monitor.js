@@ -2,8 +2,11 @@ const { updateUserAccount, getAllAcount } = require('./control');
 const wait = require('node:timers/promises').setTimeout;
 const { performance } = require('perf_hooks');
 const cron = require('node-cron');
+const getRandomInt = (min,max) => {
+    return 10*(Math.random() * (max - min) + min);
+  }
 
-const checkForNewRoles = async (u,newRole,removeRole,client,guild,member,nftData,secondTime) => {
+const checkForNewRoles = async (u,newRole,removeRole,client,guild,member,nftData) => {
     let oldRoles = u.roles;
     let roles = false;
     let content = '';
@@ -54,7 +57,7 @@ const checkForNewRoles = async (u,newRole,removeRole,client,guild,member,nftData
     }
 
     await wait(1000 * 35)
-    if(!secondTime) await client.channels.cache.get(nftData.channels.announcement).send({content: content});
+    // await client.channels.cache.get(nftData.channels.announcement).send({content: content});
     return roles;
 }
 
@@ -63,11 +66,10 @@ module.exports = {
         const { monitorWallet, getRoles } = client.nft.get('process');
         const nftData =  client.nft.get('data');
         const projectDirectory = 'NFT_PROJECTS/'+nftData.directory+'/';
-        let secondTime = false;       
 
         cron.schedule(' */5 * * * *', () => {
             console.log('running a task every 5 minutes');
-            getAllAcount(projectDirectory,(result) => {    
+            getAllAcount(projectDirectory,(result) => {
                 if(result){
                     result.map(async u => {
                         const startTime = performance.now();
@@ -82,6 +84,8 @@ module.exports = {
                                 })                                    
                             }));
 
+                            await wait(1000 * getRandomInt(1,9))
+
                             // Get role data from mirror-node
                             await monitorWallet({id:u.id, username: u.username, wallet: u.walletID},(async r => {
                                 // Roles Changes
@@ -91,14 +95,13 @@ module.exports = {
 
                                 if(additionalRole.length > 0 || removableRole.length > 0){
                                     // Check New Roles if change happen and add new role to discord                                    
-                                    await checkForNewRoles(u,additionalRole,removableRole,client,guild,member,nftData,secondTime).then(newRoles => {
+                                    await checkForNewRoles(u,additionalRole,removableRole,client,guild,member,nftData).then(newRoles => {
                                         if(typeof newRoles === 'object'){
                                             // Update Roles in Firestore Database
                                             updateUserAccount(u.id,{roles: r.roles},projectDirectory+'members');
                                             // Update NFT record in Firestore Database
                                             updateUserAccount(u.id,{nfts: r.holding.nfts, badges: r.holding.badges},projectDirectory+'holders');
                                         }
-                                        secondTime = (secondTime) ? false :true;
                                     })
                                 }
                             }));
