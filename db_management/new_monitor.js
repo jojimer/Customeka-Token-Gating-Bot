@@ -84,7 +84,7 @@ module.exports = {
                                 })                                    
                             }));
 
-                            await wait(1000 * getRandomInt(1,9))
+                            await wait(1000 * getRandomInt(1,15))
 
                             // Get role data from mirror-node
                             await monitorWallet({id:u.id, username: u.username, wallet: u.walletID},(async r => {
@@ -111,7 +111,7 @@ module.exports = {
                         
                         const endTime = performance.now();
 
-                        console.log(`Call to do something took ${(endTime - startTime) / 1000} seconds`);
+                        console.log(`Monitoring ${u.username} took ${(endTime - startTime) / 1000} seconds`);
                     })
                 }
             });
