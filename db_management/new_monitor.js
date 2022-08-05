@@ -99,6 +99,7 @@ module.exports = {
                                     // Check New Roles if change happen and add new role to discord                                    
                                     await checkForNewRoles(u,additionalRole,removableRole,client,guild,member,nftData).then(newRoles => {
                                         if(typeof newRoles === 'object'){
+                                            console.log(r)
                                             // Update Roles in Firestore Database
                                             updateUserAccount(u.id,{roles: r.roles},projectDirectory+'members');
                                             // Update NFT record in Firestore Database
