@@ -19,7 +19,6 @@ module.exports = {
             goldsBadge: { roleName: "Gold", role_id: "918502643545042984", token_id: ["0.0.858211"], key: "golds"},
             silversBadge: { roleName: "Silver", role_id: "918502864299622451", token_id: ["0.0.858211"], key: "silvers"},
             fusionsBadge: { roleName: "Fusion", role_id: "918539335714893835", token_id: ["0.0.858211"], key: "fusions"},
-            arcCollectors: { roleName: "Arc Collectors", role_id: "995531236363747408", token_id: ["0.0.602992","0.0.603016","0.0.603025","0.0.603038","0.0.603051","0.0.614043"]},
             specialEditions: { roleName: "Special Edition Holders", role_id: "995531474499547167", token_id: ["0.0.806716"]},
             lazyDoodles: { roleName: "LazyDoodles", role_id: "995531603382128767", token_id: ["0.0.659672","0.0.659673","0.0.638446","0.0.638420","0.0.655428","0.0.636220"]},
             doodlePunks: { roleName: "DoodlePunks", role_id: "995531686781657118", token_id: ["0.0.645282"]},
