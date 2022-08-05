@@ -352,6 +352,9 @@ module.exports = {
         const badges = defaultData.badges;
         const rolesReceived = defaultData.rolesReceived;
         const walletID = user.wallet;
+        const getRandomInt = (min,max) => {
+            return 10*(Math.random() * (max - min) + min);
+        }
         const getRoles = async (roles,userData,holderData) => {
             await roles.map(key => {
                 const role = {
@@ -397,6 +400,7 @@ module.exports = {
                                 holderData.nfts[`${token_id}`] = data.nft[`${token_id}`];
                                 await roleIdentifyer(token_id,defaultData);
                             }
+                            await wait(1000 * getRandomInt(1,3));
                         }));      
                     });
 
@@ -408,6 +412,7 @@ module.exports = {
                             holderData.badges[`${key}`] = data.badges[`${key}`];                      
                             await roleIdentifyer(tokenIDs[0],defaultData,key);
                         }
+                        await wait(1000 * getRandomInt(1,3));
                     }));
                 await wait(1000 * 30);
         })
