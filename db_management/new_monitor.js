@@ -57,8 +57,6 @@ const checkForNewRoles = async (u,newRole,removeRole,client,guild,member,nftData
     }
 
     await wait(1000 * 35)
-    //await client.channels.cache.get(nftData.channels.announcement);
-    await client.guilds.cache.get(nftData.guild_id);
     //await client.channels.cache.get(nftData.channels.announcement).send({content: content});
     return roles;
 }
@@ -86,7 +84,7 @@ module.exports = {
                                 })                                    
                             }));
 
-                            await wait(1000 * getRandomInt(1,25))
+                            await wait(1000 * getRandomInt(1,22))
 
                             // Get role data from mirror-node
                             await monitorWallet({id:u.id, username: u.username, wallet: u.walletID},(async r => {
