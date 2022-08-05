@@ -81,7 +81,7 @@ module.exports = {
                             currentRoles = [];
                             await getRoles(r => r.map(v => {
                                 member.roles.member._roles.map(id => {
-                                    if(id === v.role_id) 
+                                    if(id == v.role_id) 
                                       currentRoles.push({name: v.roleName, role_id: v.role_id});
                                 })                                    
                             }));
