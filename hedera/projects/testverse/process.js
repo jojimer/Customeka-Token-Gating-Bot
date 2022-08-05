@@ -3,7 +3,6 @@ const { addUser, addHolderData, addVerificationLink, isAccountExist, } = require
 const { Timestamp, doc } = require('firebase/firestore');
 const { doodleNFTs } = require('./nfts');
 const TokenGenerator = require('uuid-token-generator');
-const { Console } = require('node:console');
 const wait = require('node:timers/promises').setTimeout;
 const baseURL = "https://connect.customeka.xyz/p/";
 const discord = "https://discord.com/channels";
@@ -290,7 +289,7 @@ module.exports = {
             // Total Roles Received
             if(key === 'Roles'){
                 const iconURL = (noNFTs.bool) ? icon.error : icon.success;           
-                const finalDialoge = [[""],[""]];
+                const finalDialoge = [[""],[""]];                
 
                 if(!noNFTs.bool) {
                     finalDialoge[0] = (rolesReceived.length > 1) ? dialoges[i].content+"s: " : dialoges[i].content;

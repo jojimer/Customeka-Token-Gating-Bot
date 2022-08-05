@@ -13,10 +13,7 @@ module.exports = {
             fusions: ["0.0.858211",1,[26,86]],
         },
         Roles: {
-            arc0: { roleName: "Arc 0 Bearers", role_id: "995286450541174835", token_id: ["0.0.587177", "0.0.587188"]},
-            arc1: { roleName: "Arc 1 Bearers", role_id: "995286593915072582", token_id: ["0.0.590742", "0.0.590692", "0.0.590710", "0.0.590673", "0.0.590738", "0.0.590684", "0.0.590695", "0.0.590671" ]},
-            arc2: { roleName: "Arc 2 Bearers", role_id: "995286655827193926", token_id: ["0.0.833886"]},
-            badgeHolder: { roleName: "Badge Holders", role_id: "995286708964823180", token_id: ["0.0.602976","0.0.858211"]},
+            theArcBearers: { roleName: "TheArcBearers", role_id: "995286450541174835", token_id: ["0.0.587177", "0.0.587188", "0.0.590742", "0.0.590692", "0.0.590710", "0.0.590673", "0.0.590738", "0.0.590684", "0.0.590695", "0.0.590671", "0.0.833886"]},
             eternalsBadge: { roleName: "Eternals", role_id: "996727705590579270", token_id: ["0.0.602976"], key: "eternals"},
             diamondsBadge: { roleName: "Diamond", role_id: "996727780731527239", token_id: ["0.0.858211"], key: "diamonds"},
             goldsBadge: { roleName: "Gold", role_id: "996727823043670046", token_id: ["0.0.858211"], key: "golds"},

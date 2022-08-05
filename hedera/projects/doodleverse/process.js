@@ -3,7 +3,6 @@ const { addUser, addHolderData, addVerificationLink, isAccountExist, } = require
 const { Timestamp, doc } = require('firebase/firestore');
 const { doodleNFTs } = require('./nfts');
 const TokenGenerator = require('uuid-token-generator');
-const { Console } = require('node:console');
 const wait = require('node:timers/promises').setTimeout;
 const baseURL = "https://connect.customeka.xyz/p/";
 const discord = "https://discord.com/channels";
@@ -411,7 +410,6 @@ module.exports = {
 
         await wait(1000 * 40);
         const r = await getRoles(rolesReceived,userData);
-        //console.log(r)
         await callback(r);
     },
     getRoles: async (callback) => {

@@ -57,7 +57,8 @@ const checkForNewRoles = async (u,newRole,removeRole,client,guild,member,nftData
     }
 
     await wait(1000 * 35)
-    // await client.channels.cache.get(nftData.channels.announcement).send({content: content});
+    await client.channels.cache.get(nftData.channels.announcement);
+    //await client.channels.cache.get(nftData.channels.announcement).send({content: content});
     return roles;
 }
 
@@ -67,14 +68,14 @@ module.exports = {
         const nftData =  client.nft.get('data');
         const projectDirectory = 'NFT_PROJECTS/'+nftData.directory+'/';
 
-        cron.schedule(' */5 * * * *', () => {
-            console.log('running a task every 5 minutes');
-            getAllAcount(projectDirectory,(result) => {
+        cron.schedule(' */6 * * * *', () => {
+            console.log('Monitoring NFT holders every 6 minutes');            
+            getAllAcount(projectDirectory, async (result) => {
                 if(result){
-                    result.map(async u => {
-                        const startTime = performance.now();
-                        let currentRoles,guild,additionalRole,removableRole,Add;
-                        guild = client.guilds.cache.get(nftData.guild_id);
+                    let currentRoles,additionalRole,removableRole,guild;   
+                    guild = client.guilds.cache.get(nftData.guild_id);
+                    await result.map(async u => {
+                        const startTime = performance.now();                                             
                         await guild.members.fetch(u.id).then(async member => {
                             currentRoles = [];
                             await getRoles(r => r.map(v => {
@@ -84,7 +85,7 @@ module.exports = {
                                 })                                    
                             }));
 
-                            await wait(1000 * getRandomInt(1,15))
+                            await wait(1000 * getRandomInt(1,25))
 
                             // Get role data from mirror-node
                             await monitorWallet({id:u.id, username: u.username, wallet: u.walletID},(async r => {

@@ -29,7 +29,7 @@ module.exports = {
 			// Add listener to members database for claiming roles after verification process completed
 			snapShotRoleClaimers(client,announcementChannel,projectDirectory,nftData);
 			// Monitor Verified Users
-			// startMonitoring(client);
+			startMonitoring(client);
 		}
 	},
 };
