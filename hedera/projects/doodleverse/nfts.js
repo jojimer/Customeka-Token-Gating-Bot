@@ -13,7 +13,7 @@ module.exports = {
             fusions: ["0.0.858211",1,[26,86]],
         },
         Roles: {
-            theArcBearers: { roleName: "TheArcBearers", role_id: "963148397395705896", token_id: ["0.0.587177", "0.0.587188", "0.0.590742", "0.0.590692", "0.0.590710", "0.0.590673", "0.0.590738", "0.0.590684", "0.0.590695", "0.0.590671", "0.0.833886"]},
+            theArcBearers: { roleName: "The ArcBearers", role_id: "963148397395705896", token_id: ["0.0.587177", "0.0.587188", "0.0.590742", "0.0.590692", "0.0.590710", "0.0.590673", "0.0.590738", "0.0.590684", "0.0.590695", "0.0.590671", "0.0.833886"]},
             eternalsBadge: { roleName: "Eternals", role_id: "918938144722804738", token_id: ["0.0.602976"], key: "eternals"},
             diamondsBadge: { roleName: "Diamond", role_id: "918502720992870461", token_id: ["0.0.858211"], key: "diamonds"},
             goldsBadge: { roleName: "Gold", role_id: "918502643545042984", token_id: ["0.0.858211"], key: "golds"},

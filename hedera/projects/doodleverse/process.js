@@ -406,6 +406,7 @@ module.exports = {
                             holderData.badges[`${key}`] = data.badges[`${key}`];
                         }
                     }));
+                await wait(1000 * 30);
         })
 
         await wait(1000 * 40);
