@@ -352,7 +352,7 @@ module.exports = {
         const badges = defaultData.badges;
         const rolesReceived = defaultData.rolesReceived;
         const walletID = user.wallet;
-        const getRoles = async (roles,userData) => {
+        const getRoles = async (roles,userData,holderData) => {
             await roles.map(key => {
                 const role = {
                     name: defaultData.roles[`${key}`].roleName,
@@ -394,8 +394,8 @@ module.exports = {
                             const numb = data.total;                        
                             // Get Role
                             if(numb !== 0) {
-                                await roleIdentifyer(token_id,defaultData);
                                 holderData.nfts[`${token_id}`] = data.nft[`${token_id}`];
+                                await roleIdentifyer(token_id,defaultData);
                             }
                         }));      
                     });
@@ -404,16 +404,16 @@ module.exports = {
                     await searchBadges(walletID,tokenIDs,key,(async data => {
                         const numb = data.total;
                         // Increment Number of Badges in single Token ID
-                        if(numb !== 0){                            
+                        if(numb !== 0){      
+                            holderData.badges[`${key}`] = data.badges[`${key}`];                      
                             await roleIdentifyer(tokenIDs[0],defaultData,key);
-                            holderData.badges[`${key}`] = data.badges[`${key}`];
                         }
                     }));
                 await wait(1000 * 30);
         })
 
         await wait(1000 * 40);
-        const r = await getRoles(rolesReceived,userData);
+        const r = await getRoles(rolesReceived,userData,holderData);
         await callback(r);
     },
     getRoles: async (callback) => {

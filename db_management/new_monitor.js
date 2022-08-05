@@ -57,7 +57,8 @@ const checkForNewRoles = async (u,newRole,removeRole,client,guild,member,nftData
     }
 
     await wait(1000 * 35)
-    await client.channels.cache.get(nftData.channels.announcement);
+    //await client.channels.cache.get(nftData.channels.announcement);
+    await client.guilds.cache.get(nftData.guild_id);
     //await client.channels.cache.get(nftData.channels.announcement).send({content: content});
     return roles;
 }
@@ -67,13 +68,13 @@ module.exports = {
         const { monitorWallet, getRoles } = client.nft.get('process');
         const nftData =  client.nft.get('data');
         const projectDirectory = 'NFT_PROJECTS/'+nftData.directory+'/';
+        let currentRoles,additionalRole,removableRole,guild;
 
         cron.schedule(' */6 * * * *', () => {
-            console.log('Monitoring NFT holders every 6 minutes');            
+            console.log('Monitoring NFT holders every 6 minutes');
+            guild = client.guilds.cache.get(nftData.guild_id);          
             getAllAcount(projectDirectory, async (result) => {
                 if(result){
-                    let currentRoles,additionalRole,removableRole,guild;   
-                    guild = client.guilds.cache.get(nftData.guild_id);
                     await result.map(async u => {
                         const startTime = performance.now();                                             
                         await guild.members.fetch(u.id).then(async member => {
