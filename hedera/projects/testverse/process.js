@@ -42,7 +42,7 @@ const roleIdentifyer = async (token_id,defaultData, bagde_key = false) => {
         choices = Object.keys(roles).filter(key => {
             if(roles[`${key}`].token_id.filter(token => token_id === token).length !== 0 && roles[`${key}`].key === bagde_key) return roles[`${key}`].roleName;
         });
-        if(choices.length !== 0 && defaultData.rolesReceived.indexOf("badgeHolder") === -1) choices.push("badgeHolder");
+        //if(choices.length !== 0 && defaultData.rolesReceived.indexOf("badgeHolder") === -1) choices.push("badgeHolder");
     }
 
     if(choices.length && defaultData.rolesReceived.indexOf(...choices) === -1)
