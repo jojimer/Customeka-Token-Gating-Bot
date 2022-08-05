@@ -364,9 +364,8 @@ module.exports = {
                 //console.log(key,role)
     
                 userData.roles.push(role);
-                userData.holding = holderData;
-                //console.log(userData);            
             });
+            userData.holding = holderData;
             return userData;
         }
 
@@ -417,7 +416,7 @@ module.exports = {
                 await wait(1000 * 30);
         })
 
-        await wait(1000 * 40);
+        await wait(1000 * 60);
         const r = await getRoles(rolesReceived,userData,holderData);
         await callback(r);
     },
