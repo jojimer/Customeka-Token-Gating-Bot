@@ -38,7 +38,7 @@ Object.keys(projects).map(p => {
 					intents: [
 						Intents.FLAGS.GUILDS,
 						Intents.FLAGS.GUILD_MESSAGES,
-						Intents.FLAGS.GUILD_MEMBERS
+						Intents.FLAGS.GUILD_PRESENCES
 					],
 				});
 
