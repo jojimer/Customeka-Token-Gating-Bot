@@ -95,43 +95,46 @@ module.exports = {
                     }// Check if current user is verified
                     else if(user && user.verified === 'claimed'){
                         
-                        if(user.roles.length > 0){
-                            let currentRoles = [];
-                            let claimedText = '';
-                            const valid_roles = [];        
-                            Object.keys(defaultData.roles).map(v => {
-                                valid_roles.push(doodleNFTs.Roles[v]);
-                            });
+                        // if(user.roles.length > 0){
+                        //     let currentRoles = [];
+                        //     let claimedText = '';
+                        //     const valid_roles = [];        
+                        //     Object.keys(defaultData.roles).map(v => {
+                        //         valid_roles.push(doodleNFTs.Roles[v]);
+                        //     });
 
-                            await interaction.member.roles.cache.each(async role => {
-                                if(role.role_id !== valid_roles.filter(r => r.role_id === role.id)){
-                                    currentRoles.push(role.name);
-                                }                    
-                            });
+                        //     await interaction.member.roles.cache.each(async role => {
+                        //         if(role.role_id !== valid_roles.filter(r => r.role_id === role.id)){
+                        //             currentRoles.push(role.name);
+                        //         }                    
+                        //     });
 
-                            const difference = user.roles.filter(r => !currentRoles.includes(r.name));
+                        //     const difference = user.roles.filter(r => !currentRoles.includes(r.name));
 
-                            if(difference.length === user.roles.length){
-                                let message = reply(dialoge.alreadyVerified+"\n\n",'success');
-                                 interaction.editReply({embeds: [message]});
-                            }else{
-                                difference.map(r => claimedText += `<@&${r.role_id}> `);
-                                reply(dialoge.alreadyVerified+", \nbut you have unclaimed roles, get it now! \n\n ",'success');
-                                let rcEmbed = embed.setTitle("Click the button to reclaim your roles!");
-                                interaction.editReply({embeds: [rcEmbed], components: [reclaimBTN]});
+                        //     if(difference.length === user.roles.length){
+                        //         let message = reply(dialoge.alreadyVerified+"\n\n",'success');
+                        //          interaction.editReply({embeds: [message]});
+                        //     }else{
+                        //         difference.map(r => claimedText += `<@&${r.role_id}> `);
+                        //         reply(dialoge.alreadyVerified+", \nbut you have unclaimed roles, get it now! \n\n ",'success');
+                        //         let rcEmbed = embed.setTitle("Click the button to reclaim your roles!");
+                        //         interaction.editReply({embeds: [rcEmbed], components: [reclaimBTN]});
 
-                                const filter = i => i.user.id === currentUser;
+                        //         const filter = i => i.user.id === currentUser;
 
-                                const collector = interaction.channel.createMessageComponentCollector({ filter, time: 10000 });
+                        //         const collector = interaction.channel.createMessageComponentCollector({ filter, time: 10000 });
 
-                                collector.on('collect', async i => {
-                                    await interaction.editReply({ embeds: [rcEmbed.setTitle('You Successfully Reclaimed Roles.').setColor('#379c6f').setFooter({
-                                        text: ' ',
-                                        iconURL: null
-                                    }).setDescription('**Roles Reclaimed:** '+claimedText)], components: [] });
-                                });
-                            }
-                        }
+                        //         collector.on('collect', async i => {
+                        //             await interaction.editReply({ embeds: [rcEmbed.setTitle('You Successfully Reclaimed Roles.').setColor('#379c6f').setFooter({
+                        //                 text: ' ',
+                        //                 iconURL: null
+                        //             }).setDescription('**Roles Reclaimed:** '+claimedText)], components: [] });
+                        //         });
+                        //     }
+                        // }
+
+                        let message = reply(dialoge.alreadyVerified+"\n\n",'success');
+                        interaction.editReply({embeds: [message]});
 
                         callback(false);                        
 
@@ -351,6 +354,7 @@ module.exports = {
         const walletID = user.wallet;
         const getRoles = async (roles,userData) => {
             await roles.map(key => {
+                console.log(key)
                 const role = {
                     name: defaultData.roles[`${key}`].roleName,
                     role_id: defaultData.roles[`${key}`].role_id
