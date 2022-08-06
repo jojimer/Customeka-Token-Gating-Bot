@@ -94,51 +94,9 @@ module.exports = {
                         callback(false);
                     }// Check if current user is verified
                     else if(user && user.verified === 'claimed'){
-                        
-                        // if(user.roles.length > 0){
-                        //     let currentRoles = [];
-                        //     let claimedText = '';
-                        //     const valid_roles = [];        
-                        //     Object.keys(defaultData.roles).map(v => {
-                        //         valid_roles.push(doodleNFTs.Roles[v]);
-                        //     });
-
-                        //     await interaction.member.roles.cache.each(async role => {
-                        //         if(role.role_id !== valid_roles.filter(r => r.role_id === role.id)){
-                        //             currentRoles.push(role.name);
-                        //         }                    
-                        //     });
-
-                        //     const difference = user.roles.filter(r => !currentRoles.includes(r.name));
-
-                        //     if(difference.length === user.roles.length){
-                        //         let message = reply(dialoge.alreadyVerified+"\n\n",'success');
-                        //          interaction.editReply({embeds: [message]});
-                        //     }else{
-                        //         difference.map(r => claimedText += `<@&${r.role_id}> `);
-                        //         reply(dialoge.alreadyVerified+", \nbut you have unclaimed roles, get it now! \n\n ",'success');
-                        //         let rcEmbed = embed.setTitle("Click the button to reclaim your roles!");
-                        //         interaction.editReply({embeds: [rcEmbed], components: [reclaimBTN]});
-
-                        //         const filter = i => i.user.id === currentUser;
-
-                        //         const collector = interaction.channel.createMessageComponentCollector({ filter, time: 10000 });
-
-                        //         collector.on('collect', async i => {
-                        //             await interaction.editReply({ embeds: [rcEmbed.setTitle('You Successfully Reclaimed Roles.').setColor('#379c6f').setFooter({
-                        //                 text: ' ',
-                        //                 iconURL: null
-                        //             }).setDescription('**Roles Reclaimed:** '+claimedText)], components: [] });
-                        //         });
-                        //     }
-                        // }
-
                         let message = reply(dialoge.alreadyVerified+"\n\n",'success');
                         interaction.editReply({embeds: [message]});
-
-                        callback(false);                        
-
-                    
+                        callback(false);
                     }// Check if current user still have time to verify account
                     else if(user && user.verification_time.seconds > Timestamp.now().seconds){
                         let roles = "";
@@ -416,7 +374,7 @@ module.exports = {
                 await wait(1000 * 30);
         })
 
-        await wait(1000 * 60);
+        await wait(1000 * 65);
         const r = await getRoles(rolesReceived,userData,holderData);
         await callback(r);
     },

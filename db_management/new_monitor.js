@@ -68,9 +68,9 @@ module.exports = {
         const projectDirectory = 'NFT_PROJECTS/'+nftData.directory+'/';
         let currentRoles,additionalRole,removableRole,guild;
 
-        cron.schedule(' */6 * * * *', () => {
+        cron.schedule(' */6 * * * *', async () => {
             console.log('Monitoring NFT holders every 6 minutes');
-            guild = client.guilds.cache.get(nftData.guild_id);          
+            guild = await client.guilds.fetch(nftData.guild_id);          
             getAllAcount(projectDirectory, async (result) => {
                 if(result){
                     await result.map(async u => {
