@@ -70,7 +70,7 @@ module.exports = {
 
         cron.schedule(' */6 * * * *', async () => {
             console.log('Monitoring NFT holders every 6 minutes');
-            guild = await client.guilds.fetch(nftData.guild_id);          
+            guild = await client.guilds.fetch(nftData.guild_id);                 
             getAllAcount(projectDirectory, async (result) => {
                 if(result){
                     await result.map(async u => {
