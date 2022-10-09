@@ -6,9 +6,9 @@ const getRandomInt = (min,max) => {
     return 10*(Math.random() * (max - min) + min);
   }
 
-const checkForNewRoles = async (u,newRole,removeRole,client,guild,member,nftData) => {
-    let oldRoles = u.roles;
+const checkForNewRoles = async (u,newRole,removeRole,guild,member) => {
     let roles = false;
+    const oldRoles = u.roles;
     let content = '';
     
     if(member.user.id === u.id && newRole.length > 0){        
@@ -22,7 +22,7 @@ const checkForNewRoles = async (u,newRole,removeRole,client,guild,member,nftData
             nc_roleObj = guild.roles.cache.get(nRole.role_id);
             member.roles.add(nc_roleObj);
         })
-        console.log(u.username+ ' New Roles Acquired', newRole);
+        console.log(u.name+ ' New Roles Acquired', newRole);
 
         content += '\n\n';
         oldRoles.push(...newRole);
@@ -46,17 +46,16 @@ const checkForNewRoles = async (u,newRole,removeRole,client,guild,member,nftData
         content += (removeRole.length > 1) ? ' Roles' : 'Role';
         content += ' has been removed due to disqualification of NFT holdings';
         
-        console.log('Removed '+u.username+' Roles',removeRole);
+        console.log('Removed '+u.name+' Roles',removeRole);
 
         oldRoles.filter(role => {
-            const count = removeRole.filter(r => r.role_id === role.role_id).length;           
+            const count = removeRole.filter(r => r.role_id == role.role_id).length;           
             return count > 0;
         });
 
         roles = oldRoles;
     }
-
-    await wait(1000 * 35)
+    await wait(1000 * 35);       
     //await client.channels.cache.get(nftData.channels.announcement).send({content: content});
     return roles;
 }
@@ -66,56 +65,69 @@ module.exports = {
         const { monitorWallet, getRoles } = client.nft.get('process');
         const nftData =  client.nft.get('data');
         const projectDirectory = 'NFT_PROJECTS/'+nftData.directory+'/';
-        let currentRoles,additionalRole,removableRole,guild;
+        const guild = await client.guilds.cache.get(nftData.guild_id);               
+        let currentRoles,additionalRole,removableRole,roles;
 
-        cron.schedule(' */6 * * * *', async () => {
-            console.log('Monitoring NFT holders every 6 minutes');
-            guild = await client.guilds.fetch(nftData.guild_id);                 
-            getAllAcount(projectDirectory, async (result) => {
-                if(result){
-                    await result.map(async u => {
-                        const startTime = performance.now();                                             
-                        await guild.members.fetch(u.id).then(async member => {
-                            currentRoles = [];
-                            await getRoles(r => r.map(v => {
-                                member.roles.member._roles.map(id => {
-                                    if(id == v.role_id) 
-                                      currentRoles.push({name: v.roleName, role_id: v.role_id});
-                                })                                    
-                            }));
-
-                            await wait(1000 * getRandomInt(1,22))
-
-                            // Get role data from mirror-node
-                            await monitorWallet({id:u.id, username: u.username, wallet: u.walletID},(async r => {
-                                // Roles Changes
-                                additionalRole = r.roles.filter(v => !currentRoles.some(c => v.role_id == c.role_id));
-                                removableRole = currentRoles.filter(c => !r.roles.some(v => v.role_id == c.role_id));
-                                // console.log(currentRoles,additionalRole,removableRole);
-
-                                if(additionalRole.length > 0 || removableRole.length > 0){
-                                    // Check New Roles if change happen and add new role to discord                                    
-                                    await checkForNewRoles(u,additionalRole,removableRole,client,guild,member,nftData).then(newRoles => {
-                                        if(typeof newRoles === 'object'){
-                                            //console.log(r)
-                                            // Update Roles in Firestore Database
-                                            updateUserAccount(u.id,{roles: r.roles},projectDirectory+'members');
-                                            // Update NFT record in Firestore Database
-                                            updateUserAccount(u.id,{nfts: r.holding.nfts, badges: r.holding.badges},projectDirectory+'holders');
-                                        }
-                                    })
-                                }
-                            }));
-                        }).catch(err => {
-                            console.log(err)
-                        });
-                        
-                        const endTime = performance.now();
-
-                        console.log(`Monitoring ${u.username} took ${(endTime - startTime) / 1000} seconds`);
-                    })
+        cron.schedule(' */0.1 * * * *', async () => {
+            const users = {};
+            console.log(Object.keys(pastRecord).length,pastRecord);
+            console.log('Monitoring NFT holders every 6 minutes');          
+            await getAllAcount(projectDirectory, async (result) => await result.map(u => {
+                guild.members.fetch(u.id);
+                users[u.id] = {
+                    id: u.id,
+                    name: u.username,
+                    roles: u.roles,
+                    walletID: u.walletID,
+                    memberRoles: []
                 }
-            });
+            })).then(async () => {
+                Object.keys(users).map(async id => {
+                    const member = await guild.members.cache.get(id);
+                    const startTime = performance.now();
+                    const user = users[member.user.id];
+                    currentRoles = [];
+                    await getRoles(r => r.map(v => {
+                        roles = (Object.keys(pastRecord).length !== 0) ? pastRecord[user.id].memberRoles : member._roles;                    
+                        roles.map(id => {
+                            if(id == v.role_id) currentRoles.push({name: v.roleName, role_id: v.role_id});
+                        })       
+                    }));
+    
+                    if(!pastRecord[user.id]) pastRecord[user.id] = { memberRoles: [] };
+                    // if((Object.keys(pastRecord).length !== 0)) console.log(user.name,currentRoles,pastRecord[user.id].memberRoles,member._roles);
+
+                    await wait(1000 * getRandomInt(1,18))
+    
+                    // Get role data from mirror-node
+                    await monitorWallet({id:user.id, username: user.name, wallet: user.walletID},(async r => {
+                        // Roles Changes
+                        additionalRole = r.roles.filter(v => !currentRoles.some(c => v.role_id == c.role_id));
+                        removableRole = currentRoles.filter(c => !r.roles.some(v => v.role_id == c.role_id));
+                        // console.log(user.name,currentRoles,additionalRole,removableRole);
+    
+                        if(additionalRole.length > 0 || removableRole.length > 0){
+                            // Check New Roles if change happen and add new role to discord                                    
+                            await checkForNewRoles(user,additionalRole,removableRole,guild,member).then(newRoles => {
+                                if(typeof newRoles === 'object'){
+                                    newRoles.map(role => user.memberRoles.push(role.role_id));
+                                    pastRecord[user.id].memberRoles = user.memberRoles;
+                                    //console.log(pastRecord[user.id]);
+                                    // Update Roles in Firestore Database
+                                    updateUserAccount(user.id,{roles: r.roles},projectDirectory+'members');
+                                    // Update NFT record in Firestore Database
+                                    updateUserAccount(user.id,{nfts: r.holding.nfts, badges: r.holding.badges},projectDirectory+'holders');
+                                }else{
+                                    currentRoles.map(role => user.memberRoles.push(role.role_id));
+                                    pastRecord[user.id].memberRoles = user.memberRoles;
+                                }
+                            })
+                        }
+                    }));                       
+                    const endTime = performance.now();
+                    console.log(`Monitoring ${user.name} took ${(endTime - startTime) / 1000} seconds`);
+                });
+            })
         });        
     }
 }

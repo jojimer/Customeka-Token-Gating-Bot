@@ -27,7 +27,7 @@ module.exports = {
                 let content = `“<@${u.id}> (`;
                 let role,roleObj;
 
-                const guild = client.guilds.cache.get(nftData.guild_id);
+                const guild = client.guilds.cache.get(nftData.guild_id);                
                 guild.members.search({query: u.username, limit: 15, cache: false}).then(r => {
                     r.map(async gm => {
                         let i = 0;
@@ -52,7 +52,8 @@ module.exports = {
                             });                   
                         }
                     })
-                })																				
+                })
+                await guild.members.fetch(u.id);																
             })
         }, null, (firestoreError) => { if(firestoreError.code) this.snapShotRoleClaimers(client,announceTo,directory,nftData); }) // End of snapshot
     }

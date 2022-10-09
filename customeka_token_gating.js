@@ -20,6 +20,7 @@ global.fireBaseDB = getFirestore();
 // Set Global Root
 global.appRoot = path.resolve(__dirname);
 global.localDB = "/local_database/verified_members/";
+global.pastRecord = {};
 
 global.icon = {
 	loading: "https://firebasestorage.googleapis.com/v0/b/discordbot-db-40708.appspot.com/o/spiral_loading.gif?alt=media&token=824a63c3-a4c7-43d7-8a38-83913c590a60",

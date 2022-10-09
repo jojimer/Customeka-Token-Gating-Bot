@@ -371,7 +371,7 @@ module.exports = {
                         }
                         await wait(1000 * getRandomInt(1,3));
                     }));
-                await wait(1000 * 30);
+                await wait(1000 * getRandomInt(3,4));
         })
 
         await wait(1000 * 65);

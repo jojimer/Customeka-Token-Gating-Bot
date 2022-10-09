@@ -31,10 +31,10 @@ module.exports = {
         const docRef = doc(fireBaseDB,directory,discord_id);
         return updateDoc(docRef,data);
     },
-    getAllAcount: (directory,callback) => {
+    getAllAcount: async (directory,callback) => {
         const colRef = collection(fireBaseDB,directory+'members');
         const q = query(colRef, where("verified", "==", 'claimed'));
-        getDocs(q).then(snapshot => {
+        await getDocs(q).then(snapshot => {
             let userData =  [];
             snapshot.docs.forEach((doc) => {
                 userData.push({ ...doc.data(), id: doc.id });
@@ -43,6 +43,6 @@ module.exports = {
             // Set false if no record of wallet ID in the firebase
             let result = (userData.length) ? userData : false;
             callback(result);
-        })
+        });
     }
 }
